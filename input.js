@@ -120,26 +120,27 @@ class SiteSelection {
 
     updateSiteList() {
         if (this.startDate !== '' && this.endDate !== '') {
-            this.fetchMeasurementsData(this.startDate, this.endDate)
+            this.fetchMeasurementsData()
                 .then(data => this.processData(data))
                 .catch(error => {
                     console.log('Error:', error);
                 });
         } else if (this.endDate !== '') {
-            this.fetchMeasurementsData('', this.endDate)
+            this.fetchMeasurementsData()
                 .then(data => this.processData(data))
                 .catch(error => {
                     console.log('Error:', error);
                 });
         } else if (this.startDate !== '') {
-            console.log('RUNNING');
-            this.fetchMeasurementsData(this.startDate, '')
-                .then(data => this.processData(data))
+            this.fetchMeasurementsData()
+                .then(data => {
+                    this.processData(data)
+                })
                 .catch(error => {
                     console.log('Error:', error);
                 });
         } else {
-            this.fetchMeasurementsData('', '')
+            this.fetchMeasurementsData()
                 .then(data => this.processData(data))
                 .catch(error => {
                     console.log('Error:', error);
@@ -149,23 +150,24 @@ class SiteSelection {
 
     fetchData(url) {
         return fetch(url)
-            .then(response => response.json());
+            .then(async response => await response.json());
     }
 
-    fetchMeasurementsData(startDate, endDate) {
+    fetchMeasurementsData() {
         let api_args;
         if (this.startDate !== '' && this.endDate !== '')
         {
-            api_args = `http://127.0.0.1:8000/maritimeapp/measurements/sites/?start_date=${startDate}&end_date=${endDate}`;
+            api_args = `http://127.0.0.1:8000/maritimeapp/measurements/sites/?format=json&start_date=${this.startDate}&end_date=${this.endDate}`;
         }
         else if (this.endDate !== '')
         {
-            api_args = `http://127.0.0.1:8000/maritimeapp/measurements/sites/?end_date=${endDate}`;
+            api_args = `http://127.0.0.1:8000/maritimeapp/measurements/sites/?format=json&end_date=${this.endDate}`;
 
         }
         else if (this.startDate !== '')
         {
-            api_args = `http://127.0.0.1:8000/maritimeapp/measurements/sites/?start_date=${startDate}`;
+            api_args = `http://127.0.0.1:8000/maritimeapp/measurements/sites/?format=json&start_date=${this.startDate}`;
+            console.log(this.startDate)
 
         }
         else {
@@ -202,16 +204,23 @@ class SiteSelection {
 
 
                 listItem.addEventListener('click', () => {
-                    this.moveItemToList(item.site_name);
-                    this.saveSelectedItem(item.site_name);
-                    listItem.classList.add('selected');
+
+                    if (!listItem.className.includes('selected'))
+                    {
+                        this.moveItemToList(item.site_name);
+                        this.saveSelectedItem(item.site_name);
+                        listItem.classList.add('selected');
+                    }
+                    if (listItem.className.includes('selected'))
+                    {
+                        listItem.classList.remove('selected')
+                    }
                 });
                 this.originalList.appendChild(listItem);
             });
         }
         else {
             data.results.forEach(item => {
-                console.log("RUNNIN")
                 const listItem = document.createElement('li');
                 listItem.classList.add('item');
 
@@ -222,20 +231,22 @@ class SiteSelection {
 
                 // Create additional information elements
                 const info1 = document.createElement('p');
-                info1.textContent = 'Information 1: ' + item.info1;
+                info1.innerHTML = `MAN Site: <a href="http://" target="_blank" ">${item.name}</a>`;
                 listItem.appendChild(info1);
 
                 const info2 = document.createElement('p');
-                info2.textContent = 'Information 2: ' + item.info2;
+                info2.textContent = 'Description: ' + item.description;
                 listItem.appendChild(info2);
 
                 listItem.addEventListener('click', () => {
-                    this.moveItemToList(item.name);
-                    this.saveSelectedItem(item.name);
-                    if (this.originalList.contains(listItem)) {
-                        listItem.classList.remove('selected');
-                    } else {
+                    if (!listItem.className.includes('selected')) {
                         listItem.classList.add('selected');
+                        this.moveItemToList(item.name);
+                        this.saveSelectedItem(item.name);
+                    }
+                    else if(listItem.className.includes('selected')){
+                        listItem.classList.remove('selected');
+
                     }
                 });
 
@@ -243,12 +254,6 @@ class SiteSelection {
             });
         }
     }
-
-    // createListItem(text) {
-    //     const listItem = document.createElement('li');
-    //     listItem.textContent = text;
-    //     return listItem;
-    // }
 
     clearList() {
         while (this.originalList.firstChild) {
@@ -351,7 +356,7 @@ const submitData = (dateField, siteSelection) => {
     const submitButton = document.createElement('button');
     submitButton.textContent = 'Submit';
     document.body.appendChild(submitButton);
-// Add click event listener to the submit button
+
 
     submitButton.addEventListener('click', () => {
         console.log(siteSelection.newList.innerHTML)
@@ -365,9 +370,6 @@ const submitData = (dateField, siteSelection) => {
         window.location.href = `map.html?var1=${encodeURIComponent(startDate)}&var2=${encodeURIComponent(endDate)}&var3=${encodeURIComponent(siteList)}`;
     });
 }
-
-// Call the function
-// create_site_selection();
 
 window.onload = function() {
     const dateField = new DateFieldCreator();
