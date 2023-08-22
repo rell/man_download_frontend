@@ -122,8 +122,8 @@ export class MarkerManager {
           const numSegments = latlngs.length - 1;
           const colorScale = d3
               .scaleLinear()
-              .domain([0, numSegments])
-              .range(['rgb(255, 0, 0)', 'rgb(0, 255, 0)']);
+              .domain([0, numSegments/2,  numSegments])
+              .range(['rgb(255, 0, 0)', 'rgb(124, 122, 312 )', 'rgb(0, 255, 0)']);
           let segments_arr = []
           latlngs.forEach((latlng, index) => {
             const nextLatLng = latlngs[index + 1];
