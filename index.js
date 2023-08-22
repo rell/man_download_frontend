@@ -21,7 +21,29 @@ async function fetchAllResults(url) {
     return allResults;
 }
 
-const api_call = 'http://127.0.0.1:8000/maritimeapp/measurements/?level=15&page=1&reading=aod&type=daily'
+
+const startDate  = localStorage.getItem('startDate')
+const endDate  = localStorage.getItem('endDate')
+const minLat  = localStorage.getItem('minLat')
+const minLng  = localStorage.getItem('minLng')
+const maxLat  = localStorage.getItem('maxLat')
+const maxLng  = localStorage.getItem('maxLng')
+const siteList = localStorage.getItem('siteList')
+localStorage.removeItem('startDate')
+localStorage.removeItem('endDate')
+localStorage.removeItem('minLat')
+localStorage.removeItem('minLng')
+localStorage.removeItem('maxLat')
+localStorage.removeItem('maxLng')
+localStorage.removeItem('siteList')
+console.log(startDate, endDate, minLat, minLng, maxLng, maxLat)
+console.log(siteList)
+
+
+
+
+// const api_call = 'http://127.0.0.1:8000/maritimeapp/measurements/?level=15&page=1&reading=aod&type=daily'
+const api_call = `http://127.0.0.1:8000/maritimeapp/measurements/?level=15&page=1&reading=aod&type=daily&min_lat=${minLat}&min_lng=${minLng}&max_lat=${maxLat}&max_lng=${maxLat}`
 const api_url = 'http://localhost:8000/maritimeapp/measurements/'
 
 console.log("TEST WORKED")
@@ -33,6 +55,7 @@ const allResults = await fetchAllResults(api_call);
 const map = initMap();
 
 const markerLayer = new MarkerManager(map);
+markerLayer.setSiteList(siteList);
 // markerLayer.addMarker2(allResults);
 markerLayer.addMarker(allResults);
 map.setView([0,0], 0);

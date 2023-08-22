@@ -19,6 +19,8 @@ function generateGradientColors(startColor, endColor, numSteps) {
 }
 export class MarkerManager {
   constructor(map, args = undefined, fieldsClass = undefined) {
+    this.siteList = []
+    this.backupSiteList = []
     this.maxRadius = 30;
     this.fieldsClass = fieldsClass;
     this.defaultRadius = 10;
@@ -54,10 +56,15 @@ export class MarkerManager {
     const site = 'site';
     const name = 'name';
 
-    data.forEach(async (element) => {
+    if (this.siteList === null)
+    {
+      this.siteList = []
+    }
 
-      if (!element[this.activeDepth].toString().includes('-999')) {
-        const clusterName = element.filename.toLowerCase();
+    data.forEach(async (element) => {
+      if (!element[this.activeDepth].toString().includes('-999') && this.siteList.length === 0 || this.siteList.includes(element.site.name)) {
+
+        const clusterName = element.site.name.toLowerCase();
 
         if (!this.markerGroups[clusterName]) {
           this.markerGroups[clusterName] = L.featureGroup();
@@ -70,7 +77,7 @@ export class MarkerManager {
           weight: 0,
           riseOnHover: true,
           fillColor: setColor(element[this.activeDepth]),
-          fillOpacity: 0.85,
+          fillOpacity: 1,
           radius: parseFloat(element[this.activeDepth]) + this.defaultRadius,
         });
 
@@ -115,7 +122,7 @@ export class MarkerManager {
           const numSegments = latlngs.length - 1;
           const colorScale = d3
               .scaleLinear()
-              .domain([0, numSegments - 1])
+              .domain([0, numSegments])
               .range(['rgb(255, 0, 0)', 'rgb(0, 255, 0)']);
           let segments_arr = []
           latlngs.forEach((latlng, index) => {
@@ -244,4 +251,8 @@ export class MarkerManager {
     console.log(this.markersLayer)
     this.map.addLayer(this.markersLayer);
   }
+
+    setSiteList(siteList) {
+        this.siteList = siteList
+    }
 }
