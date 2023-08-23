@@ -21,14 +21,13 @@ async function fetchAllResults(url) {
     return allResults;
 }
 
-
-const startDate  = localStorage.getItem('startDate')
-const endDate  = localStorage.getItem('endDate')
-const minLat  = localStorage.getItem('minLat')
-const minLng  = localStorage.getItem('minLng')
-const maxLat  = localStorage.getItem('maxLat')
-const maxLng  = localStorage.getItem('maxLng')
-const siteList = localStorage.getItem('siteList')
+const startDate  = eval(localStorage.getItem('startDate'))
+const endDate  = eval(localStorage.getItem('endDate'))
+const minLat  = eval(localStorage.getItem('minLat'))
+const minLng  = eval(localStorage.getItem('minLng'))
+const maxLat  = eval(localStorage.getItem('maxLat'))
+const maxLng  = eval(localStorage.getItem('maxLng'))
+const siteList = eval(localStorage.getItem('siteList'))
 localStorage.removeItem('startDate')
 localStorage.removeItem('endDate')
 localStorage.removeItem('minLat')
@@ -53,6 +52,7 @@ const allResults = await fetchAllResults(api_call);
 
 
 const map = initMap();
+// const fields = new FieldInitialzer()
 
 const markerLayer = new MarkerManager(map);
 markerLayer.setSiteList(siteList);
