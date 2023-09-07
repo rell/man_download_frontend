@@ -1,28 +1,49 @@
-export function initMap()
-{
-    // const copy = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-    const basemap = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-    const layer = L.tileLayer(basemap, {attribution: '<a href="https://openstreetmap.org">OpenStreetMap</a> ', noWrap: true, tileSize: 256 });
+export function initMap() {
+    let basemapLayer, options, bounds;
 
+    const basemapUrl =
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+    basemapLayer = L.tileLayer(basemapUrl, {
+        attribution: '<a href="https://openstreetmap.org">OpenStreetMap</a>',
+        noWrap: true,
+        tileSize: 256,
+        errorTileUrl: '',
+        errorTileTimeout: 5000,
+    });
+
+    const labelsUrl =
+        'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}';
+    const labelsLayer = L.tileLayer(labelsUrl, {
+        zIndex: 1,
+        noWrap: true,
+        tileSize: 256,
+        errorTileUrl: '',
+        errorTileTimeout: 5000,
+    });
 
     // Define the bounds for the map
-    const bounds = [
+    bounds = [
         [-90, -180], // Southwest coordinates
-        [90, 180] // Northeast coordinates
+        [90, 180], // Northeast coordinates
     ];
-    const options = {
-        layers: [layer],
+
+    options = {
+        layers: [basemapLayer, labelsLayer],
         minwidth: 200,
-        minZoom: 2.45,
-        maxZoom: 18,
-        maxBounds: bounds
-    }
-    // Create the Leaflet map
+        minZoom: 2,
+        maxZoom: 17,
+        maxBounds: bounds,
+    };
 
-    // Return the map object
-    return L.map('map', options);
+    // Create the Leaflet map with basemap layer and labels layer
+    const map = L.map('map', options);
+
+    // Return the map object and basemap layer
+    return {
+        map: map,
+        basemapLayer: basemapLayer,
+    };
 }
-
 export function initDropdown(id, options, fieldDescription, placeholder, disabledPlaceholder, group, toolTipContent)// create dropdown fields
 {
     let dropdownHTML = `<div class="tooltip-container">

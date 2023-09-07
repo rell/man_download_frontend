@@ -21,7 +21,7 @@ body
 {
     overflow-y: hidden;
 }
-#fields {
+.fields {
     width: 30%;
     float: left;
     margin-left: 20px;
@@ -195,4 +195,12 @@ button {
 .input-container button {
     display: inline-block;
     vertical-align: middle;
+}
+
+.grayed-out {
+    background-color: #333333;
+    fill: #333333;
+    opacity: 0.5; /* Reduce opacity to make it appear grayed out */
+    pointer-events: none; /* Disable pointer events to make it unclickable */
+    cursor: not-allowed; /* Change cursor to indicate unavailability */
 }

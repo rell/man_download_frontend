@@ -1,6 +1,9 @@
 // import { getAvg, getAvgUrl, getFullData, buildChartData, latestOfSet } from './data.js';
 import { setColor } from './components.js';
 import { drawGraph } from './chart.js';
+import { FieldInit } from "./fields.js";
+import {getData} from "./data.js";
+
 // import { } // set all keys to data in a config file
 
 function generateGradientColors(startColor, endColor, numSteps) {
@@ -18,43 +21,62 @@ function generateGradientColors(startColor, endColor, numSteps) {
   return colors;
 }
 export class MarkerManager {
-  constructor(map, args = undefined, fieldsClass = undefined) {
+  FieldInit = new FieldInit;
+
+  constructor(map, baseLayer, args = undefined) {
+    this.FieldInit.setMarkerClass(self)
     this.setsAtAOD = 0
     this.totalSets = 0
-    this.endDate = null;
-    this.startDate = null;
+    this.endDate = this.FieldInit.end_date;
+    this.startDate = this.FieldInit.start_date;
     this.emptyList = false
     this.currentPolylineGroup = null;
     this.activeDepth = 'aod_500nm';
     this.siteList = []
     this.defaultRadius = 10;
     this.map = map;
+    this.baseLayer = baseLayer
     this.markerGroups = {}
     this.featureGroup = L.featureGroup().addTo(this.map)
+    this.api_call = null;
+    this.outsideModified = false
+    this.siteDates = {}
+    // this.FieldInit.siteList = this.siteList;
     this.resetMap();
+    this.InitDrawControl();
+
   }
 
-
   addMarker(data) {
-    if (this.siteList === null || this.siteList.length === 0)
-    {
-      this.siteList = []
-      this.emptyList = true
+    if (this.siteList === null || this.siteList.length === 0 || this.outsideModified) {
+      this.siteList = [];
+      this.emptyList = true;
     }
 
-    console.log("SITE LIST",this.siteList, typeof this.siteList)
-    this.totalSets > 0 ? this.totalSets = 0 :
-    this.setsAtAOD > 0 ? this.setsAtAOD = 0 :
+    // Clear existing marker groups and feature group
+    Object.values(this.markerGroups).forEach((markerGroup) => {
+      markerGroup.clearLayers();
+    });
+    this.featureGroup.clearLayers();
+
+    this.totalSets > 0 ? (this.totalSets = 0) : this.setsAtAOD > 0 ? (this.setsAtAOD = 0) : null;
+
     data.forEach(async (element) => {
       this.totalSets++;
-
       if (this.emptyList || this.siteList.includes(element.site.name)) {
         this.setsCaptured++;
-        //
-        if (this.emptyList)
-        {
-          // console.log("TEST")
-          this.siteList.push(element.site.name)
+
+        if (this.emptyList) {
+          this.siteList.push(element.site.name);
+
+        }
+
+        if (!(element.site.name in this.siteDates)) {
+          // If the site name does not exist, create a new array with the current date
+          this.siteDates[element.site.name] = [element.date];
+        } else {
+          // If the site name already exists, append the current date to the existing array
+          this.siteDates[element.site.name].push(element.date);
         }
 
         const clusterName = element.site.name.toLowerCase();
@@ -152,21 +174,24 @@ export class MarkerManager {
     });
 
     this.siteList = [...new Set(this.siteList)];
-    console.log(this.siteList.length, this.setsAtAOD, this.totalSets)
+    this.FieldInit.siteList = this.siteList;
+    this.FieldInit.siteDates = this.siteDates
 
-    // Create an empty feature group to store the marker groups
-    const featureGroup = L.featureGroup();
-
-    // Add each marker group to the feature group
-    Object.values(this.markerGroups).forEach((markerGroup) => {
-      featureGroup.addLayer(markerGroup);
+    // Clear the map
+    this.map.eachLayer((layer) => {
+      if (layer !== this.baseLayer) {
+        this.map.removeLayer(layer);
+      }
     });
 
-    // Add the feature group to the map
-    featureGroup.addTo(this.map);
+    // Add each marker group to the map
+    Object.values(this.markerGroups).forEach((markerGroup) => {
+      markerGroup.addTo(this.map);
+    });
+
+
 
   }
-
   resetMap() {
     const customControl = L.Control.extend({
       options: {
@@ -187,7 +212,95 @@ export class MarkerManager {
     });
     this.map.addControl(new customControl());
   }
-    setSiteList(siteList) {
+
+  InitDrawControl()
+  {
+    this.drawnItems = new L.FeatureGroup().addTo(this.map);
+
+    this.drawControl = new L.Control.Draw({
+      draw: {
+        rectangle: true,
+        polyline: false,
+        circle: false,
+        circlemarker: false,
+        polygon: false,
+        marker: false
+      },
+      edit: {
+        featureGroup: this.drawnItems
+      }
+    }).addTo(this.map);
+
+    this.map.on(L.Draw.Event.CREATED, this.onRectangleCreated.bind(this));
+  }
+
+  async onRectangleCreated(event) {
+    const layer = event.layer;
+    this.drawnItems.addLayer(layer);
+
+    const bounds = layer.getBounds();
+    const minLatLng = bounds.getSouthWest();
+    const maxLatLng = bounds.getNorthEast();
+
+    this.minLat = minLatLng.lat;
+    this.minLng = minLatLng.lng;
+    this.maxLat = maxLatLng.lat;
+    this.maxLng = maxLatLng.lng;
+
+    console.log('Minimum Latitude:', this.minLat);
+    console.log('Minimum Longitude:', this.minLng);
+    console.log('Maximum Latitude:', this.maxLat);
+    console.log('Maximum Longitude:', this.maxLng);
+
+    // Call the FieldInit method or perform any other desired actions with the captured bounds
+    this.FieldInit.handleBounds(this.minLat, this.minLng, this.maxLat, this.maxLng);
+    this.createAPICall()
+    this.data = await getData(this.api_call)
+    console.log(this.data)
+    this.updateMarkers()
+  }
+
+  createAPICall(){
+     this.api_call = 'http://127.0.0.1:4956/maritimeapp/measurements/?format=json&level=15&reading=aod&type=daily';
+    if (this.startDate && this.startDate !== 'null') {
+
+      this.api_call += `&start_date=${this.startDate}`;
+    }
+    if (this.endDate && this.endDate !== 'null') {
+
+      this.api_call += `&end_date=${this.endDate}`;
+    }
+    if (this.minLat && this.minLat !== 'null') {
+
+      this.api_call += `&min_lat=${this.minLat}`;
+    }
+    if (this.minLng && this.minLng !== 'null') {
+
+      this.api_call += `&min_lng=${this.minLng}`;
+    }
+    if (this.maxLat && this.maxLat !== 'null') {
+
+      this.api_call += `&max_lat=${this.maxLat}`;
+    }
+    if (this.maxLng && this.maxLng !== 'null') {
+
+      this.api_call += `&max_lng=${this.maxLng}`;
+    }
+
+  }
+
+
+  updateMarkers()
+  {
+    this.outsideModified = true
+    this.addMarker(this.data)
+    console.log(this.siteList)
+  }
+
+  setSiteList(siteList) {
         this.siteList = eval(siteList)
     }
+  shareMarkerClass(markerLayer){
+    this.FieldInit.setMarkerClass(markerLayer)
+  }
 }

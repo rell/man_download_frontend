@@ -232,36 +232,42 @@ class BoundingBoxContainer {
 
 class SiteSelection {
     constructor() {
+        this.startDate = null;
+        this.endDate = null;
         this.minLat = null;
         this.minLng = null;
         this.maxLat = null;
         this.maxLng = null;
+        this.createElements();
+        this.appendElements();
+    }
 
-
-        this.startDate = '';
-        this.endDate = '';
+    createElements()
+    {
         this.containerDiv = document.createElement('div');
-        this.headerDiv = document.createElement('div');
         this.containerDiv.classList.add('site-container');
-        this.listContainer = document.createElement('div');
 
-        this.originalList = document.createElement('ul');
-        this.originalList.classList.add('original-list');
-        this.newList = document.createElement('ul');
-        this.newList.classList.add('new-list');
+        this.headerDiv = document.createElement('div');
         const h1 = document.createElement('h1');
         h1.textContent = 'Select Areas of Interest';
         this.headerDiv.appendChild(h1);
+
+        this.listContainer = document.createElement('div');
+        this.listContainer.classList.add('lists')
+
+        this.originalList = document.createElement('ul');
+        this.originalList.classList.add('original-list');
+
+        this.newList = document.createElement('ul');
+        this.newList.classList.add('new-list');
+    }
+    appendElements()
+    {
         this.containerDiv.appendChild(this.headerDiv)
         this.listContainer.appendChild(this.originalList);
-        this.listContainer.appendChild(this.newList);
-        this.listContainer.classList.add('lists')
         this.containerDiv.appendChild(this.listContainer)
-
         document.body.appendChild(this.containerDiv);
-
     }
-
 
     handleChange(event) {
         const { name, value } = event.target;
@@ -324,53 +330,54 @@ class SiteSelection {
         let api_args;
         if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.startDate !== '' && this.endDate !== '')
         {
-            api_args = `http://127.0.0.1:8000/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.startDate}&end_date=${this.endDate}`;
+            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.startDate}&end_date=${this.endDate}`;
         }
         else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.endDate !== '')
         {
-            api_args = `http://127.0.0.1:8000/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&end_date=${this.endDate}`;
+            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&end_date=${this.endDate}`;
 
         }
         else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.startDate !== '')
         {
-            api_args = `http://127.0.0.1:8000/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.startDate}`;
+            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.startDate}`;
 
         }
         else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null)
         {
-            api_args = `http://127.0.0.1:8000/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}`;
+            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}`;
 
         }
-        else if (this.startDate !== '' && this.endDate !== '')
+        else if (this.startDate !== null && this.endDate !== null)
         {
-            api_args = `http://127.0.0.1:8000/maritimeapp/measurements/sites/?format=json&start_date=${this.startDate}&end_date=${this.endDate}`;
+            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&start_date=${this.startDate}&end_date=${this.endDate}`;
         }
-        else if (this.endDate !== '')
+        else if (this.endDate !== null)
         {
-            api_args = `http://127.0.0.1:8000/maritimeapp/measurements/sites/?format=json&end_date=${this.endDate}`;
+            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&end_date=${this.endDate}`;
 
         }
-        else if (this.startDate !== '')
+        else if (this.startDate !== null)
         {
-            api_args = `http://127.0.0.1:8000/maritimeapp/measurements/sites/?format=json&start_date=${this.startDate}`;
+            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&start_date=${this.startDate}`;
             console.log(this.startDate)
 
         }
         else {
-            api_args = `http://127.0.0.1:8000/maritimeapp/sites/`
+            console.log("running here line 366")
+            api_args = `http://127.0.0.1:4956/maritimeapp/sites/`
         }
         return this.fetchData(api_args);
     }
 
     processData(data) {
         this.clearList();
-        console.log(data.results)
+        // console.log(data.results)
         if (data.results === undefined)
         {
             console.log(data)
             data.forEach(item => {
 
-                console.log("RUNNIN")
+                // console.log("RUNNIN")
                 const listItem = document.createElement('li');
                 listItem.classList.add('item');
 
