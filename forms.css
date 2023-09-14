@@ -3,13 +3,14 @@
 h2
 {
     font-family: 'Open Sans', sans-serif;
-    padding: 0;
-    margin-top: 10px;
+    padding: 20px 0 20px 0;
+    /*margin-top: 10px;*/
     margin-bottom: 0;
 }
-form{
+.fields{
     font-family: 'Open Sans', sans-serif;
-    padding: 10px;
+
+    /*padding: 10px;*/
     /*margin-top: 50%;*/
 }
 label
@@ -21,18 +22,7 @@ body
 {
     overflow-y: hidden;
 }
-.fields {
-    width: 30%;
-    float: left;
-    margin-left: 20px;
-}
 
-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-
-}
 
 select {
     display: inline-block;
@@ -69,6 +59,7 @@ input[type="text"] {
 
 
 button {
+    margin: 0 10px 0 10px;
     display: inline-block;
     border-radius: 0.25rem;
     padding: 0.5rem 1rem;
@@ -204,3 +195,9 @@ button {
     pointer-events: none; /* Disable pointer events to make it unclickable */
     cursor: not-allowed; /* Change cursor to indicate unavailability */
 }
+
+.hidden
+{
+    display: none;
+}
+

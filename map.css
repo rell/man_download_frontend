@@ -1,12 +1,15 @@
 #map-container {
     display: inline-flex;
-    width: 100%;
+    /*width: 100%;*/
 }
 html,
 body,
 #map {
     height: 100vh;
-    width: 100%;
+    width: calc(100vw - 30vw);
+    display: inline-flex;
+    /*width: 60vw;*/
+    /*width: 100%;*/
     float: left;
 }
 body {
@@ -225,3 +228,73 @@ div#currentTime {
     FONT-SIZE: SMALL;
 }
 
+ /*Fields*/
+
+.input-container {
+    width: 400px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 20px;
+}
+form label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+form input {
+    /*width: 100%;*/
+    padding: 8px;
+    margin-bottom: 15px;
+}
+form button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #45a049;
+}
+.site-container {
+    /*display: flex;*/
+    /*height: 20em; !* Adjust the height as needed *!*/
+}
+
+.original-list,
+.new-list {
+    flex: 1;
+    overflow-y: auto;
+    height: 400px;
+    width: 500px;
+    max-height: calc(100% - 2em); /* Subtract 2em for the scrollbar */
+}
+
+.original-list {
+    background-color: #f0f0f0;
+}
+
+.selected {
+    background-color: #333; /* Set the desired darker background color */
+    color: #fff; /* Set the desired text color */
+}
+
+.item {
+    margin-bottom: 5px;
+    height: auto;
+    padding: 10px;
+    list-style: none;
+    /*background-color: #f0f0f0;*/
+    border: none;
+}
+li {
+    text-decoration: none;
+    list-style-type: none;
+
+}
+
+.lists
+{
+    display: flex;
+}

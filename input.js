@@ -52,7 +52,7 @@ class DateFieldCreator {
         const addButtonContainer = document.createElement('div');
         const submitButton = document.createElement('button');
         submitButton.setAttribute('type', 'submit');
-        submitButton.textContent = 'Submit';
+        submitButton.textContent = 'Update';
         addButtonContainer.classList.add('button-container');
         addButtonContainer.appendChild(submitButton);
         this.containerDiv.appendChild(addButtonContainer);
@@ -170,7 +170,7 @@ class BoundingBoxContainer {
 
         this.submitButton = document.createElement('button');
         this.submitButton.setAttribute('type', 'submit');
-        this.submitButton.textContent = 'Submit'
+        this.submitButton.textContent = 'Update'
         this.submissionContainer.appendChild(this.submitButton);
     }
 
@@ -264,8 +264,8 @@ class SiteSelection {
     appendElements()
     {
         this.containerDiv.appendChild(this.headerDiv)
-        this.listContainer.appendChild(this.originalList);
         this.containerDiv.appendChild(this.listContainer)
+        this.listContainer.appendChild(this.originalList);
         document.body.appendChild(this.containerDiv);
     }
 
@@ -280,7 +280,8 @@ class SiteSelection {
         }
     }
 
-    updateSiteList() {
+    updateSiteList()
+    {
         let listItems = Array.from(this.newList.children);
         listItems.forEach(listItem => {
             this.newList.removeChild(listItem)
@@ -291,34 +292,6 @@ class SiteSelection {
             .catch(error => {
                 console.log('Error:', error);
             });
-
-        // if (this.startDate !== '' && this.endDate !== '') {
-        //     this.fetchMeasurementsData()
-        //         .then(data => this.processData(data))
-        //         .catch(error => {
-        //             console.log('Error:', error);
-        //         });
-        // } else if (this.endDate !== '') {
-        //     this.fetchMeasurementsData()
-        //         .then(data => this.processData(data))
-        //         .catch(error => {
-        //             console.log('Error:', error);
-        //         });
-        // } else if (this.startDate !== '') {
-        //     this.fetchMeasurementsData()
-        //         .then(data => {
-        //             this.processData(data)
-        //         })
-        //         .catch(error => {
-        //             console.log('Error:', error);
-        //         });
-        // } else {
-        //     this.fetchMeasurementsData()
-        //         .then(data => this.processData(data))
-        //         .catch(error => {
-        //             console.log('Error:', error);
-        //         });
-        // }
     }
 
     fetchData(url) {
@@ -326,7 +299,8 @@ class SiteSelection {
             .then(async response => await response.json());
     }
 
-    fetchMeasurementsData() {
+    fetchMeasurementsData()
+    {
         let api_args;
         if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.startDate !== '' && this.endDate !== '')
         {
@@ -369,7 +343,8 @@ class SiteSelection {
         return this.fetchData(api_args);
     }
 
-    processData(data) {
+    processData(data)
+    {
         this.clearList();
         // console.log(data.results)
         if (data.results === undefined)
@@ -438,7 +413,8 @@ class SiteSelection {
                     }
                 });
 
-                this.originalList.appendChild(listItem);            });
+                this.originalList.appendChild(listItem);
+            });
         }
         else {
             data.results.forEach(item => {

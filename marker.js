@@ -41,6 +41,7 @@ export class MarkerManager {
     this.api_call = null;
     this.outsideModified = false
     this.siteDates = {}
+    // this.FieldInit.siteList = this.siteList
     // this.FieldInit.siteList = this.siteList;
     this.resetMap();
     this.InitDrawControl();
@@ -48,10 +49,13 @@ export class MarkerManager {
   }
 
   addMarker(data) {
-    if (this.siteList === null || this.siteList.length === 0 || this.outsideModified) {
-      this.siteList = [];
-      this.emptyList = true;
-    }
+    this.siteDates = {}
+    // console.log(this.siteList)
+    // if (this.siteList === null || this.siteList.length === 0) {
+    //   this.siteList = [];
+    //   this.emptyList = true;
+    // }
+    // console.log(this.siteList)
 
     // Clear existing marker groups and feature group
     Object.values(this.markerGroups).forEach((markerGroup) => {
@@ -60,9 +64,17 @@ export class MarkerManager {
     this.featureGroup.clearLayers();
 
     this.totalSets > 0 ? (this.totalSets = 0) : this.setsAtAOD > 0 ? (this.setsAtAOD = 0) : null;
-
+    // if (data.results)
+    // {
+    //   data = data.results
+    // }
     data.forEach(async (element) => {
+
       this.totalSets++;
+      console.log(this.emptyList)
+      console.log(this.siteList)
+      console.log(this.siteList.includes(element.site.name))
+
       if (this.emptyList || this.siteList.includes(element.site.name)) {
         this.setsCaptured++;
 
@@ -193,7 +205,7 @@ export class MarkerManager {
 
   }
   resetMap() {
-    const customControl = L.Control.extend({
+    const resetMap = L.Control.extend({
       options: {
         position: 'bottomright'
       },
@@ -210,7 +222,7 @@ export class MarkerManager {
         return button;
       }
     });
-    this.map.addControl(new customControl());
+    this.map.addControl(new resetMap());
   }
 
   InitDrawControl()
@@ -232,7 +244,43 @@ export class MarkerManager {
     }).addTo(this.map);
 
     this.map.on(L.Draw.Event.CREATED, this.onRectangleCreated.bind(this));
+
   }
+
+  async drawRecAuto() {
+    if (
+        this.FieldInit.minLat !== null &&
+        this.FieldInit.minLng !== null &&
+        this.FieldInit.maxLat !== null &&
+        this.FieldInit.maxLng !== null
+    ) {
+      this.minLat = this.FieldInit.minLat;
+      this.minLng = this.FieldInit.minLng;
+      this.maxLat = this.FieldInit.maxLat;
+      this.maxLng = this.FieldInit.maxLng;
+
+      const southWest = L.latLng(this.minLat, this.minLng);
+      const northEast = L.latLng(this.maxLat, this.maxLng);
+      const bounds = L.latLngBounds(southWest, northEast);
+      const rectangle = L.rectangle(bounds);
+
+      await this.onRectangleCreated({ layer: rectangle });
+    }
+    else
+    {
+      this.minLat = this.FieldInit.minLat;
+      this.minLng = this.FieldInit.minLng;
+      this.maxLat = this.FieldInit.maxLat;
+      this.maxLng = this.FieldInit.maxLng;
+
+      this.createAPICall();
+      this.data = await getData(this.api_call);
+      this.addMarker(this.data)
+
+
+    }
+  }
+
 
   async onRectangleCreated(event) {
     const layer = event.layer;
@@ -247,18 +295,35 @@ export class MarkerManager {
     this.maxLat = maxLatLng.lat;
     this.maxLng = maxLatLng.lng;
 
-    console.log('Minimum Latitude:', this.minLat);
-    console.log('Minimum Longitude:', this.minLng);
-    console.log('Maximum Latitude:', this.maxLat);
-    console.log('Maximum Longitude:', this.maxLng);
-
     // Call the FieldInit method or perform any other desired actions with the captured bounds
-    this.FieldInit.handleBounds(this.minLat, this.minLng, this.maxLat, this.maxLng);
-    this.createAPICall()
-    this.data = await getData(this.api_call)
-    console.log(this.data)
-    this.updateMarkers()
+    await this.FieldInit.handleBounds(this.minLat, this.minLng, this.maxLat, this.maxLng);
+    this.FieldInit.minlatInput.value = this.minLat
+    this.FieldInit.minlngInput.value = this.minLng
+    this.FieldInit.maxlatInput.value = this.maxLat
+    this.FieldInit.maxlngInput.value = this.maxLng
+    this.FieldInit.updateSiteList()
+    this.createAPICall();
+    this.data = await getData(this.api_call);
+    this.addMarker(this.data)
+
+
+    // const bounds = L.latLngBounds(
+    //     L.latLng(this.minLat, this.minLng),
+    //     L.latLng(this.maxLat, this.maxLng)
+    // );
+    const transparentStyle = {
+      color: 'red',
+      weight: 2,
+      fill: false,
+      opacity: 100,
+      interactive: false
+    };
+
+// Create a transparent rectangle layer
+    const rectangle = L.rectangle(bounds, transparentStyle).addTo(this.map);
+
   }
+
 
   createAPICall(){
      this.api_call = 'http://127.0.0.1:4956/maritimeapp/measurements/?format=json&level=15&reading=aod&type=daily';
@@ -289,17 +354,72 @@ export class MarkerManager {
 
   }
 
+  // evenListener() {
+  //   this.minLng.addEventListener('change', async () => {
+  //     if (this.minLng != null) {
+  //       this.createAPICall()
+  //       this.data = await getData(this.api_call)
+  //       this.addMarker(this.data)
+  //
+  //     }
+  //     console.log()
+  //   })
+  // }
 
-  updateMarkers()
-  {
-    this.outsideModified = true
-    this.addMarker(this.data)
-    console.log(this.siteList)
+
+  async updateMarkersFromFields() {
+    this.minLat = this.FieldInit.minLat
+    this.maxLat = this.FieldInit.maxLat
+    this.maxLng = this.FieldInit.maxLng
+    this.minLng = this.FieldInit.minLng
+    this.startDate = this.FieldInit.start_date
+    this.endDate = this.FieldInit.end_date
+
+    this.createAPICall()
+    this.data = await getData(this.api_call)
+    // this.updateMarkers()
+  }
+
+
+  async updateMarkers() {
+    this.minLat = this.FieldInit.minLat
+    this.maxLat = this.FieldInit.maxLat
+    this.maxLng = this.FieldInit.maxLng
+    this.minLng = this.FieldInit.minLng
+    this.startDate = this.FieldInit.start_date;
+    this.endDate = this.FieldInit.end_date;
+
+    if (
+        this.FieldInit.minLat !== null &&
+        this.FieldInit.minLng !== null &&
+        this.FieldInit.maxLat !== null &&
+        this.FieldInit.maxLng !== null
+    )
+    {
+      await this.drawRecAuto()
+    }
+    else
+    {
+      this.createAPICall()
+      console.log(this.api_call)
+
+      this.data = await getData(this.api_call)
+      // this.outsideModified = true
+      this.addMarker(this.data)
+    }
+//     this.createAPICall()
+//     this.data = await getData(this.api_call)
+//     this.outsideModified = true
+//     this.addMarker(this.data)
+// //     console.log(this.siteList)
   }
 
   setSiteList(siteList) {
+
         this.siteList = eval(siteList)
-    }
+
+        console.log(this.siteList)
+  }
   shareMarkerClass(markerLayer){
     this.FieldInit.setMarkerClass(markerLayer)
   }

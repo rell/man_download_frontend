@@ -4,7 +4,7 @@ import { initMap } from './init.js';
 import {FieldInit} from '/fields.js'
 import {getData} from "./data.js";
 
-
+let buildBox = false
 const startDate  = localStorage.getItem('startDate')
 const endDate  = localStorage.getItem('endDate')
 const minLat  = eval(localStorage.getItem('minLat'))
@@ -44,6 +44,8 @@ let api_call = 'http://127.0.0.1:4956/maritimeapp/measurements/?format=json&leve
 
     if (maxLng && maxLng !== 'null') {
         api_call += `&max_lng=${maxLng}`;
+        console.log("WORKED")
+        buildBox = true
     }
 
 const api_url = 'http://localhost:4956/maritimeapp/measurements/'
@@ -57,6 +59,16 @@ const markerLayer = new MarkerManager(map, baseLayer);
 markerLayer.shareMarkerClass(markerLayer)
 markerLayer.setSiteList(siteList);
 markerLayer.addMarker(allResults);
+
+if (buildBox)
+{
+    markerLayer.FieldInit.minLat = minLat
+    markerLayer.FieldInit.minLng = minLng
+    markerLayer.FieldInit.maxLat = maxLat
+    markerLayer.FieldInit.maxLng = maxLng
+
+    markerLayer.drawRecAuto()
+}
 map.setView([0,0], 0);
 
 // console.log(allResults);
