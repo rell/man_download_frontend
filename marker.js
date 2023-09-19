@@ -71,9 +71,9 @@ export class MarkerManager {
     data.forEach(async (element) => {
 
       this.totalSets++;
-      console.log(this.emptyList)
-      console.log(this.siteList)
-      console.log(this.siteList.includes(element.site.name))
+      // console.log(this.emptyList)
+      // console.log(this.siteList)
+      // console.log(this.siteList.includes(element.site.name))
 
       if (this.emptyList || this.siteList.includes(element.site.name)) {
         this.setsCaptured++;
@@ -174,7 +174,11 @@ export class MarkerManager {
             polylineGroup.addTo(this.map)
 
 
-            const popupContent = `${element.date}`;
+            console.log(element)
+
+            const popupContent = `
+              ${element.date} \n ${element.site.name} \n
+            `;
             const popup = L.popup().setContent(popupContent);
             event.target.bindPopup(popup).openPopup();
           });

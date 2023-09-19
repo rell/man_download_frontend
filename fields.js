@@ -366,6 +366,7 @@ export class FieldInit
             newListItem.textContent = item;
             this.newList.appendChild(newListItem);
         }
+
         // newListItem.addEventListener('click', () => {
         //     const index = Array.from(this.originalList.children).findIndex(
         //         listItem => listItem.textContent === item
@@ -386,6 +387,8 @@ export class FieldInit
         {
             // console.log(data)
             data.forEach(item => {
+
+                // console.log(item.site_name)
                 // console.log(item)
                 // console.log("RUNNIN")
                 const listItem = document.createElement('li');
@@ -398,7 +401,7 @@ export class FieldInit
 
                 // Create additional information elements
                 const info1 = document.createElement('p');
-                info1.innerHTML = `MAN Site: <a href="https://aeronet.gsfc.nasa.gov/new_web/cruises_v3/${item.name}.html" target="_blank" ">${item.name}</a>`;
+                info1.innerHTML = `MAN Site: <a href="https://aeronet.gsfc.nasa.gov/new_web/cruises_v3/${item.site_name}.html" target="_blank" ">${item.site_name}</a>`;
                 listItem.appendChild(info1);
 
                 const info2 = document.createElement('p');
@@ -424,33 +427,35 @@ export class FieldInit
                 info2.textContent = 'Description: ';
                 listItem.appendChild(info2);
 
-
-
-                listItem.addEventListener('click', () => {
-
-                    if (!listItem.className.includes('selected'))
-                    {
-                        this.moveItemToList(item.site_name);
-                        // this.saveSelectedItem(item.site_name);
-                        listItem.classList.add('selected');
-                    }
-                    if (listItem.className.includes('selected'))
-                    {
-                        listItem.classList.remove('selected')
-                    }
-                });
+                // if (item)
 
                 listItem.addEventListener('click', () => {
+                    // console.log("hello world")
+
                     if (!listItem.className.includes('selected')) {
                         listItem.classList.add('selected');
-                        this.moveItemToList(item.name);
+                        this.moveItemToList(item.site_name);
                         // this.saveSelectedItem(item.name);
                     }
                     else if(listItem.className.includes('selected')){
                         listItem.classList.remove('selected');
+                        this.moveItemToList(item.site_name)
 
                     }
                 });
+                //
+                // listItem.addEventListener('click', () => {
+                //     if (!listItem.className.includes('selected')) {
+                //
+                //         listItem.classList.add('selected');
+                //         this.moveItemToList(item.name);
+                //         // this.saveSelectedItem(item.name);
+                //     }
+                //     else if(listItem.className.includes('selected')){
+                //         listItem.classList.remove('selected');
+                //
+                //     }
+                // });
 
                 this.originalList.appendChild(listItem);
             });
@@ -491,6 +496,8 @@ export class FieldInit
                 }
 
                 listItem.addEventListener('click', () => {
+
+                    // console.log("bye world")
                     if (!listItem.className.includes('selected')) {
                         listItem.classList.add('selected');
                         this.moveItemToList(item.name);
