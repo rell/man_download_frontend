@@ -50,12 +50,7 @@ export class MarkerManager {
 
   addMarker(data) {
     this.siteDates = {}
-    // console.log(this.siteList)
-    // if (this.siteList === null || this.siteList.length === 0) {
-    //   this.siteList = [];
-    //   this.emptyList = true;
-    // }
-    // console.log(this.siteList)
+
 
     // Clear existing marker groups and feature group
     Object.values(this.markerGroups).forEach((markerGroup) => {
@@ -64,16 +59,11 @@ export class MarkerManager {
     this.featureGroup.clearLayers();
 
     this.totalSets > 0 ? (this.totalSets = 0) : this.setsAtAOD > 0 ? (this.setsAtAOD = 0) : null;
-    // if (data.results)
-    // {
-    //   data = data.results
-    // }
+
     data.forEach(async (element) => {
 
       this.totalSets++;
-      // console.log(this.emptyList)
-      // console.log(this.siteList)
-      // console.log(this.siteList.includes(element.site.name))
+
 
       if (this.emptyList || this.siteList.includes(element.site.name)) {
         this.setsCaptured++;
@@ -140,7 +130,7 @@ export class MarkerManager {
             });
 
 
-            // Create a new layer group for the polyline segments
+            // Creates a new layer group for the polyline segments
             const polylineGroup = L.layerGroup();
 
 
@@ -411,11 +401,6 @@ export class MarkerManager {
       // this.outsideModified = true
       this.addMarker(this.data)
     }
-//     this.createAPICall()
-//     this.data = await getData(this.api_call)
-//     this.outsideModified = true
-//     this.addMarker(this.data)
-// //     console.log(this.siteList)
   }
 
   setSiteList(siteList) {
