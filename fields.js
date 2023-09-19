@@ -5,9 +5,7 @@
 // This class is responsible for initializing and updating the various fields in the user interface
 
 
-export class FieldInit
-{
-    ;
+export class FieldInit {
     constructor() {
         this.selectedOptions = {};
 
@@ -70,21 +68,57 @@ export class FieldInit
         // Setup
         this.setupFields();
         this.setupCookie();
-        this.initiateListeners();
+        this.submissionListener();
 
 
     }
 
-    setupFields()
-    {
+    async setupCookie() {
+        let csrfToken = await this.getCSRFCookie()
+        console.log(csrfToken['csrfToken'])
+        this.csrfToken = csrfToken['csrfToken']
+        console.log(this.csrfToken)
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 7); // Set the expiration to 7 days from now
+
+        document.cookie = `csrftoken=${this.csrfToken}; SameSite=Strict; Secure; expires=${expirationDate.toUTCString()}`;
+        // console.log(document.cookie)
+    }
+
+    getCSRFCookie() {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'http://127.0.0.1:4956/maritimeapp/get-csrf-token/', true);
+            xhr.onreadystatechange = async function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        console.log("HERE")
+                        const csrfToken = JSON.parse(xhr.response)
+                        // const csrfToken = xhr.getResponseHeader('csrfToken');
+                        // console.log(csrfToken)
+                        resolve(csrfToken);
+                    } else {
+                        reject(new Error('Failed to retrieve CSRF token'));
+                    }
+                }
+            };
+            xhr.send();
+        });
+    }
+
+    setupFields() {
         this.fileDataModificationSection()
         this.fileOptionSelection()
         document.body.appendChild(this.containerDiv);
         this.mapContainer.appendChild(this.containerDiv)
     }
 
-    fileOptionSelection()
-    {
+    setMarkerClass(markerLayer) {
+        this.markerLayer = markerLayer
+    }
+
+
+    fileOptionSelection() {
         this.fileOptionContainer = document.createElement('div')
         this.fileOptionContainer.style.padding = '25px 10px 25px 10px'
         this.fileOptionContainer.classList.add('file-options')
@@ -114,11 +148,7 @@ export class FieldInit
         this.boundSelection();
         this.siteSelection();
         this.updateSiteList()
-        this.modificationEventListeners();
-    //
-    }
-    modificationEventListeners() {
-        this.boundaryEventListener();
+        //
     }
 
     fetchData(url) {
@@ -128,44 +158,29 @@ export class FieldInit
             .then(async response => await response.json());
     }
 
-    fetchMeasurementsData()
-    {
+    fetchMeasurementsData() {
         let api_args;
         // console.log(this.start_date)
-        if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.start_date !== '' && this.end_date !== '')
-        {
+        if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.start_date !== '' && this.end_date !== '') {
             api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.start_date}&end_date=${this.end_date}`;
-        }
-        else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.end_date !== '')
-        {
+        } else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.end_date !== '') {
             api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&end_date=${this.end_date}`;
 
-        }
-        else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.start_date !== '')
-        {
+        } else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.start_date !== '') {
             api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.start_date}`;
 
-        }
-        else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null)
-        {
+        } else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null) {
             api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}`;
 
-        }
-        else if (this.start_date !== null && this.end_date !== null)
-        {
+        } else if (this.start_date !== null && this.end_date !== null) {
             api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&start_date=${this.start_date}&end_date=${this.end_date}`;
-        }
-        else if (this.end_date !== null)
-        {
+        } else if (this.end_date !== null) {
             api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&end_date=${this.end_date}`;
 
-        }
-        else if (this.start_date !== null)
-        {
+        } else if (this.start_date !== null) {
             api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&start_date=${this.start_date}`;
 
-        }
-        else {
+        } else {
             console.log("running here line 366")
             api_args = `http://127.0.0.1:4956/maritimeapp/sites/`
         }
@@ -173,15 +188,112 @@ export class FieldInit
         return this.fetchData(api_args);
     }
 
-    siteSelection()
-    {
+    processData(data) {
+        this.clearList();
+        // console.log(data.results)
+        if (data.results === undefined) {
+            // console.log(data)
+            data.forEach(item => {
+
+                // console.log(item.site_name)
+                // console.log(item)
+                // console.log("RUNNIN")
+                const listItem = document.createElement('li');
+                listItem.classList.add('item');
+
+                // Create the site name element
+                const siteName = document.createElement('h3');
+                siteName.textContent = item.site_name;
+                listItem.appendChild(siteName);
+
+                // Create additional information elements
+                const info1 = document.createElement('p');
+                info1.innerHTML = `MAN Site: <a href="https://aeronet.gsfc.nasa.gov/new_web/cruises_v3/${item.site_name}.html" target="_blank" ">${item.site_name}</a>`;
+                listItem.appendChild(info1);
+
+                const info2 = document.createElement('p');
+
+                info2.textContent = 'Description: ';
+                listItem.appendChild(info2);
+
+                // if (item)
+
+                listItem.addEventListener('click', () => {
+                    // console.log("hello world")
+
+                    if (!listItem.className.includes('selected')) {
+                        listItem.classList.add('selected');
+                        this.moveItemToList(item.site_name);
+                        // this.saveSelectedItem(item.name);
+                    } else if (listItem.className.includes('selected')) {
+                        listItem.classList.remove('selected');
+                        this.moveItemToList(item.site_name)
+
+                    }
+                });
+
+                this.originalList.appendChild(listItem);
+            });
+        } else {
+            data.results.forEach(item => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('item');
+
+                // Create the site name element
+                const siteName = document.createElement('h3');
+                siteName.textContent = item.name;
+                listItem.appendChild(siteName);
+
+                // Create additional information elements
+                const info1 = document.createElement('p');
+                info1.innerHTML = `MAN Site: <a href="https://aeronet.gsfc.nasa.gov/new_web/cruises_v3/${item.name}.html" target="_blank" ">${item.name}</a>`;
+                listItem.appendChild(info1);
+
+                const info2 = document.createElement('p');
+                if (siteName.textContent.includes('-')) {
+                    const siteNameParts = siteName.textContent.split('-');
+                    const lastPart = siteNameParts[siteNameParts.length - 1].trim();
+                    if (!isNaN(parseFloat(lastPart))) {
+                        const description_name = item.name
+                        let first_year = description_name.split('-')[0].split('_')
+                        first_year = first_year[first_year.length - 1]
+                        const second_year = description_name.split('-')[1]
+                        info2.textContent = `Start-End: 20${first_year}-20${second_year}`;
+                        listItem.appendChild(info2);
+                    }
+                } else {
+                    info2.textContent = 'Description: ';
+                    listItem.appendChild(info2);
+                }
+
+                listItem.addEventListener('click', () => {
+
+                    // console.log("bye world")
+                    if (!listItem.className.includes('selected')) {
+                        listItem.classList.add('selected');
+                        this.moveItemToList(item.name);
+                        // this.saveSelectedItem(item.name);
+                    } else if (listItem.className.includes('selected')) {
+                        listItem.classList.remove('selected');
+                        this.moveItemToList(item.name)
+
+                    }
+                });
+
+                this.originalList.appendChild(listItem);
+            });
+        }
+    }
+
+
+    siteSelection() {
         this.siteDiv = document.createElement('div');
         this.siteDiv.classList.add('site-container');
         const siteDivHeader = document.createElement('h2');
         siteDivHeader.textContent = 'Select Cruise(s)';
         siteDivHeader.style.justifyContent = 'center';
         siteDivHeader.style.display = 'flex';
-        siteDivHeader.addEventListener('click', function() {
+        siteDivHeader.addEventListener('click', function () {
             this.siteDivFields.classList.toggle('hidden'); // Toggle the 'hidden' class
         }.bind(this));
         this.siteDiv.appendChild(siteDivHeader)
@@ -195,12 +307,12 @@ export class FieldInit
         searchInput.placeholder = 'Search...';
         searchInput.style.width = '40%'
         searchInput.style.minWidth = '50px'
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             const searchQuery = this.value.toLowerCase();
             this.tempListItems = Array.from(document.querySelectorAll('.original-list li')); // Update this line
             // this.searchActive = this.tempListItems.length >= 1;
 
-            this.tempListItems.forEach(function(item) {
+            this.tempListItems.forEach(function (item) {
                 const itemText = item.textContent.toLowerCase();
                 if (itemText.includes(searchQuery)) {
                     item.style.display = 'block';
@@ -232,36 +344,6 @@ export class FieldInit
 
     }
 
-    dateButtons()
-    {
-        const addButtonContainer = document.createElement('div');
-        this.dateClearButton = document.createElement('button');
-        this.dateUpdateButton = document.createElement('button');
-        this.dateClearButton.textContent = 'Clear';
-        this.dateClearButton.style.float = 'left';
-        this.dateUpdateButton.textContent = 'Update';
-        this.dateUpdateButton.style.float = 'right';
-        addButtonContainer.appendChild(this.dateClearButton)
-        addButtonContainer.appendChild(this.dateUpdateButton)
-        this.dateSelectionCont.appendChild(addButtonContainer)
-
-        this.dateEventListener()
-    }
-
-    boundaryButtons()
-    {
-        const addButtonContainer = document.createElement('div');
-        this.boundaryClearButton = document.createElement('button');
-        this.boundaryUpdateButton = document.createElement('button');
-        this.boundaryClearButton.textContent = 'Clear';
-        this.boundaryClearButton.style.float = 'left';
-        this.boundaryUpdateButton.textContent = 'Update';
-        this.boundaryUpdateButton.style.float = 'right';
-        addButtonContainer.appendChild(this.boundaryClearButton)
-        addButtonContainer.appendChild(this.boundaryUpdateButton)
-        this.boundSelectionContainer.appendChild(addButtonContainer)
-
-    }
     siteButtons() {
         const addButtonContainer = document.createElement('div');
         const addAllButton = document.createElement('button');
@@ -276,7 +358,7 @@ export class FieldInit
         this.siteUpdateButton.style.float = 'right'
 
 
-        this.siteUpdateButton.addEventListener("click", () =>{
+        this.siteUpdateButton.addEventListener("click", () => {
             this.siteList = Array.from(this.newList.children).map(child => child.textContent)
 
             this.markerLayer.setSiteList(Array.from(this.newList.children).map(child => child.textContent))
@@ -306,9 +388,7 @@ export class FieldInit
     }
 
 
-
-    updateSiteList()
-    {
+    updateSiteList() {
         // console.log(data)
         let listItems = Array.from(this.newList.children);
         listItems.forEach(listItem => {
@@ -327,6 +407,7 @@ export class FieldInit
             this.originalList.firstChild.remove();
         }
     }
+
     addAllSites() {
         const listItems = Array.from(this.originalList.children);
         listItems.forEach(listItem => {
@@ -352,8 +433,7 @@ export class FieldInit
         localStorage.removeItem('selectedItem');
     }
 
-    moveItemToList(item)
-    {
+    moveItemToList(item) {
         const existingItem = Array.from(this.newList.children).find(
             listItem => listItem.textContent === item
         );
@@ -361,243 +441,11 @@ export class FieldInit
         if (existingItem) {
             this.newList.removeChild(existingItem);
 
-        }else {
+        } else {
             const newListItem = document.createElement('li');
             newListItem.textContent = item;
             this.newList.appendChild(newListItem);
         }
-
-        // newListItem.addEventListener('click', () => {
-        //     const index = Array.from(this.originalList.children).findIndex(
-        //         listItem => listItem.textContent === item
-        //     );
-        //
-        //     if (index !== -1) {
-        //         this.originalList.children[index].classList.remove('selected');
-        //     }
-        //
-        //     newListItem.remove();
-        // });
-
-    }
-    processData(data) {
-        this.clearList();
-        // console.log(data.results)
-        if (data.results === undefined)
-        {
-            // console.log(data)
-            data.forEach(item => {
-
-                // console.log(item.site_name)
-                // console.log(item)
-                // console.log("RUNNIN")
-                const listItem = document.createElement('li');
-                listItem.classList.add('item');
-
-                // Create the site name element
-                const siteName = document.createElement('h3');
-                siteName.textContent = item.site_name;
-                listItem.appendChild(siteName);
-
-                // Create additional information elements
-                const info1 = document.createElement('p');
-                info1.innerHTML = `MAN Site: <a href="https://aeronet.gsfc.nasa.gov/new_web/cruises_v3/${item.site_name}.html" target="_blank" ">${item.site_name}</a>`;
-                listItem.appendChild(info1);
-
-                const info2 = document.createElement('p');
-                // if (siteName.textContent.includes('-'))
-                // {
-                //     const siteNameParts = siteName.textContent.split('-');
-                //     const lastPart = siteNameParts[siteNameParts.length - 1].trim();
-                //     if (!isNaN(parseFloat(lastPart))) {
-                //         const description_name = item.name
-                //         let first_year = description_name.split('-')[0].split('_')
-                //         first_year = first_year[first_year.length - 1]
-                //         const second_year =description_name.split('-')[1]
-                //         info2.textContent = `Start-End: 20${first_year}-20${second_year}`;
-                //         listItem.appendChild(info2);
-                //     }
-                // }
-                // else
-                // {
-                //     info2.textContent = 'Description: ';
-                //     listItem.appendChild(info2);
-                //
-                // }
-                info2.textContent = 'Description: ';
-                listItem.appendChild(info2);
-
-                // if (item)
-
-                listItem.addEventListener('click', () => {
-                    // console.log("hello world")
-
-                    if (!listItem.className.includes('selected')) {
-                        listItem.classList.add('selected');
-                        this.moveItemToList(item.site_name);
-                        // this.saveSelectedItem(item.name);
-                    }
-                    else if(listItem.className.includes('selected')){
-                        listItem.classList.remove('selected');
-                        this.moveItemToList(item.site_name)
-
-                    }
-                });
-                //
-                // listItem.addEventListener('click', () => {
-                //     if (!listItem.className.includes('selected')) {
-                //
-                //         listItem.classList.add('selected');
-                //         this.moveItemToList(item.name);
-                //         // this.saveSelectedItem(item.name);
-                //     }
-                //     else if(listItem.className.includes('selected')){
-                //         listItem.classList.remove('selected');
-                //
-                //     }
-                // });
-
-                this.originalList.appendChild(listItem);
-            });
-        }
-        else {
-            data.results.forEach(item => {
-                const listItem = document.createElement('li');
-                listItem.classList.add('item');
-
-                // Create the site name element
-                const siteName = document.createElement('h3');
-                siteName.textContent = item.name;
-                listItem.appendChild(siteName);
-
-                // Create additional information elements
-                const info1 = document.createElement('p');
-                info1.innerHTML = `MAN Site: <a href="https://aeronet.gsfc.nasa.gov/new_web/cruises_v3/${item.name}.html" target="_blank" ">${item.name}</a>`;
-                listItem.appendChild(info1);
-
-                const info2 = document.createElement('p');
-                if (siteName.textContent.includes('-'))
-                {
-                    const siteNameParts = siteName.textContent.split('-');
-                    const lastPart = siteNameParts[siteNameParts.length - 1].trim();
-                    if (!isNaN(parseFloat(lastPart))) {
-                        const description_name = item.name
-                        let first_year = description_name.split('-')[0].split('_')
-                        first_year = first_year[first_year.length - 1]
-                        const second_year =description_name.split('-')[1]
-                        info2.textContent = `Start-End: 20${first_year}-20${second_year}`;
-                        listItem.appendChild(info2);
-                    }
-                }
-                else
-                {
-                    info2.textContent = 'Description: ';
-                    listItem.appendChild(info2);
-                }
-
-                listItem.addEventListener('click', () => {
-
-                    // console.log("bye world")
-                    if (!listItem.className.includes('selected')) {
-                        listItem.classList.add('selected');
-                        this.moveItemToList(item.name);
-                        // this.saveSelectedItem(item.name);
-                    }
-                    else if(listItem.className.includes('selected')){
-                        listItem.classList.remove('selected');
-                        this.moveItemToList(item.name)
-
-                    }
-                });
-
-                this.originalList.appendChild(listItem);
-            });
-        }
-    }
-
-
-
-    qualityTypeSelection()
-    {
-        this.qualitySelectionContainer = document.createElement('div');
-        this.qualitySelectionContainer.classList.add('quality-selection')
-
-        this.qualitySelectionDiv = document.createElement('div')
-        this.qualitySelectionDiv.classList.add('hidden')
-
-        // Add a section heading using an h1 element
-        const downloadLevelHeader = document.createElement('h2');
-        downloadLevelHeader.textContent = 'Quality Level';
-        downloadLevelHeader.style.justifyContent = 'center';
-        downloadLevelHeader.style.display = 'flex';
-        downloadLevelHeader.addEventListener('click', function() {
-            this.qualitySelectionDiv.classList.toggle('hidden'); // Toggle the 'hidden' class
-        }.bind(this));
-        this.qualitySelectionContainer.appendChild(downloadLevelHeader);
-
-        // Create an object to store the selected options
-
-        this.createRadioButton('level-select10', 'Level 1.0', 'lev10',this.qualitySelectionDiv);
-        this.createRadioButton('level-select15', 'Level 1.5', 'lev15',this.qualitySelectionDiv);
-        this.createRadioButton('level-select20', 'Level 2.0', 'lev20',this.qualitySelectionDiv);
-
-        this.qualitySelectionContainer.appendChild(this.qualitySelectionDiv)
-        this.fileOptionContainer.appendChild(this.qualitySelectionContainer)
-        // this.fieldsContainer.appendChild(this.selectionContainer);
-    }
-
-    dataTypeSelection()
-    {
-        this.dataTypeContainer = document.createElement('div');
-        this.dataTypeContainer.classList.add('data-selection')
-        this.dataTypeSelectionContainer = document.createElement('div')
-        this.dataTypeSelectionContainer.classList.add('hidden')
-        // Add a section heading using an h1 element
-        const downloadLevelHeader = document.createElement('h2');
-        downloadLevelHeader.textContent = 'Data Type';
-        downloadLevelHeader.style.justifyContent = 'center';
-        downloadLevelHeader.style.display = 'flex';
-
-        downloadLevelHeader.addEventListener('click', function() {
-            this.dataTypeSelectionContainer.classList.toggle('hidden'); // Toggle the 'hidden' class
-        }.bind(this));
-
-        this.dataTypeContainer.appendChild(downloadLevelHeader);
-
-        // Create an object to store the selected options
-
-        this.createRadioButton('aod', 'AOD', 'aod', this.dataTypeSelectionContainer);
-        this.createRadioButton('sda', 'SDA', 'sda', this.dataTypeSelectionContainer);
-        this.dataTypeContainer.appendChild(this.dataTypeSelectionContainer)
-        this.fileOptionContainer.appendChild(this.dataTypeContainer);
-    }
-
-
-    readingTypeSelection()
-    {
-        this.readingTypeContainer = document.createElement('div');
-        this.readingTypeContainer.classList.add('reading-selection');
-        this.readingSelectionContainer = document.createElement('div')
-        this.readingSelectionContainer.classList.add('hidden')
-        // Add a section heading using an h1 element
-        const readingHeader = document.createElement('h2');
-        // downloadLevelHeader.style.backgroundColor = 'blue'
-        readingHeader.textContent = 'Reading Type';
-        readingHeader.style.justifyContent = 'center';
-        readingHeader.style.display = 'flex';
-
-        readingHeader.addEventListener('click', function() {
-            this.readingSelectionContainer.classList.toggle('hidden'); // Toggle the 'hidden' class
-        }.bind(this));
-
-        this.readingTypeContainer.appendChild(readingHeader);
-
-        // Create an object to store the selected options
-        this.createRadioButton('all_points', 'all points', 'all_points', this.readingSelectionContainer);
-        this.createRadioButton('series', 'series', 'series', this.readingSelectionContainer);
-        this.createRadioButton('daily', 'daily', 'daily', this.readingSelectionContainer);
-        this.readingTypeContainer.appendChild(this.readingSelectionContainer)
-        this.fileOptionContainer.appendChild(this.readingTypeContainer);
     }
 
     createRadioButton = (id, label, value, div) => {
@@ -644,136 +492,86 @@ export class FieldInit
 
     };
 
-    downloadButton()
-    {
-        this.submitButton = document.createElement('button')
-        this.submitButton.classList.add('download')
-        this.submitButton.type = 'submit'
-        this.submitButton.textContent = 'Download'
-        this.submitButton.style.position = 'relative';
-        this.submitButton.style.bottom = '10px';
-        this.submitButton.style.width = '100%'
-        this.submitButton.style.margin = '20px 0px 0px 0px'
-        this.fieldsContainer.appendChild(this.submitButton)
+    qualityTypeSelection() {
+        this.qualitySelectionContainer = document.createElement('div');
+        this.qualitySelectionContainer.classList.add('quality-selection')
 
+        this.qualitySelectionDiv = document.createElement('div')
+        this.qualitySelectionDiv.classList.add('hidden')
 
+        // Add a section heading using an h1 element
+        const downloadLevelHeader = document.createElement('h2');
+        downloadLevelHeader.textContent = 'Quality Level';
+        downloadLevelHeader.style.justifyContent = 'center';
+        downloadLevelHeader.style.display = 'flex';
+        downloadLevelHeader.addEventListener('click', function () {
+            this.qualitySelectionDiv.classList.toggle('hidden'); // Toggle the 'hidden' class
+        }.bind(this));
+        this.qualitySelectionContainer.appendChild(downloadLevelHeader);
+
+        // Create an object to store the selected options
+
+        this.createRadioButton('level-select10', 'Level 1.0', 'lev10', this.qualitySelectionDiv);
+        this.createRadioButton('level-select15', 'Level 1.5', 'lev15', this.qualitySelectionDiv);
+        this.createRadioButton('level-select20', 'Level 2.0', 'lev20', this.qualitySelectionDiv);
+
+        this.qualitySelectionContainer.appendChild(this.qualitySelectionDiv)
+        this.fileOptionContainer.appendChild(this.qualitySelectionContainer)
+        // this.fieldsContainer.appendChild(this.selectionContainer);
     }
 
-    async setupCookie() {
-        let csrfToken = await this.getCSRFCookie()
-        console.log(csrfToken['csrfToken'])
-        this.csrfToken = csrfToken['csrfToken']
-        console.log(this.csrfToken)
-        const expirationDate = new Date();
-        expirationDate.setDate(expirationDate.getDate() + 7); // Set the expiration to 7 days from now
+    dataTypeSelection() {
+        this.dataTypeContainer = document.createElement('div');
+        this.dataTypeContainer.classList.add('data-selection')
+        this.dataTypeSelectionContainer = document.createElement('div')
+        this.dataTypeSelectionContainer.classList.add('hidden')
+        // Add a section heading using an h1 element
+        const downloadLevelHeader = document.createElement('h2');
+        downloadLevelHeader.textContent = 'Data Type';
+        downloadLevelHeader.style.justifyContent = 'center';
+        downloadLevelHeader.style.display = 'flex';
 
-        document.cookie = `csrftoken=${this.csrfToken}; SameSite=Strict; Secure; expires=${expirationDate.toUTCString()}`;
-        // console.log(document.cookie)
+        downloadLevelHeader.addEventListener('click', function () {
+            this.dataTypeSelectionContainer.classList.toggle('hidden'); // Toggle the 'hidden' class
+        }.bind(this));
+
+        this.dataTypeContainer.appendChild(downloadLevelHeader);
+
+        // Create an object to store the selected options
+
+        this.createRadioButton('aod', 'AOD', 'aod', this.dataTypeSelectionContainer);
+        this.createRadioButton('sda', 'SDA', 'sda', this.dataTypeSelectionContainer);
+        this.dataTypeContainer.appendChild(this.dataTypeSelectionContainer)
+        this.fileOptionContainer.appendChild(this.dataTypeContainer);
     }
 
-    getCSRFCookie() {
-        return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', 'http://127.0.0.1:4956/maritimeapp/get-csrf-token/', true);
-            xhr.onreadystatechange = async function () {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200) {
-                        console.log("HERE")
-                        const csrfToken = JSON.parse(xhr.response)
-                        // const csrfToken = xhr.getResponseHeader('csrfToken');
-                        // console.log(csrfToken)
-                        resolve(csrfToken);
-                    } else {
-                        reject(new Error('Failed to retrieve CSRF token'));
-                    }
-                }
-            };
-            xhr.send();
-        });
+
+    readingTypeSelection() {
+        this.readingTypeContainer = document.createElement('div');
+        this.readingTypeContainer.classList.add('reading-selection');
+        this.readingSelectionContainer = document.createElement('div')
+        this.readingSelectionContainer.classList.add('hidden')
+        // Add a section heading using an h1 element
+        const readingHeader = document.createElement('h2');
+        // downloadLevelHeader.style.backgroundColor = 'blue'
+        readingHeader.textContent = 'Reading Type';
+        readingHeader.style.justifyContent = 'center';
+        readingHeader.style.display = 'flex';
+
+        readingHeader.addEventListener('click', function () {
+            this.readingSelectionContainer.classList.toggle('hidden'); // Toggle the 'hidden' class
+        }.bind(this));
+
+        this.readingTypeContainer.appendChild(readingHeader);
+
+        // Create an object to store the selected options
+        this.createRadioButton('all_points', 'all points', 'all_points', this.readingSelectionContainer);
+        this.createRadioButton('series', 'series', 'series', this.readingSelectionContainer);
+        this.createRadioButton('daily', 'daily', 'daily', this.readingSelectionContainer);
+        this.readingTypeContainer.appendChild(this.readingSelectionContainer)
+        this.fileOptionContainer.appendChild(this.readingTypeContainer);
     }
 
-    handleBounds(minLat, minLng, maxLat, maxLng)
-    {
-        this.minLat = minLat
-        this.minLng = minLng
-        this.maxLat = maxLat
-        this.maxLng = maxLng
-    }
-
-// Usage
-//     getCSRFCookie()
-// .then(csrfToken => {
-//     // Use the CSRF token in your JavaScript code or set it as a cookie
-//     console.log('CSRF Token:', csrfToken);
-//     // Set the CSRF token as a cookie using JavaScript
-//     document.cookie = 'csrftoken=' + csrfToken + '; SameSite=Strict; Secure';
-// })
-// .catch(error => {
-//     console.error('Error:', error);
-// });
-    initiateListeners() {
-        this.submitButton.addEventListener('click', async event => {
-            // Disable the button
-            this.submitButton.disabled = true;
-            // Add a class to change the button style
-            this.submitButton.textContent = 'Processing, Please wait.';
-            this.submitButton.classList.add('grayed-out');
-
-            const url = 'http://127.0.0.1:4956/maritimeapp/download/'; // Update the URL to the appropriate endpoint
-            const options = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': this.csrfToken,
-                },
-                body: JSON.stringify({
-                    sites: {list: this.siteList, dates: this.siteDates},
-                    date_range: {start_date: this.start_date, end_date: this.end_date},
-                    download_options : this.selectedOptions
-                    // console.log
-                }),
-            };
-
-            console.log(options.body);
-
-            try {
-                const response = await fetch(url, options);
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const downloadLink = document.createElement('a');
-                    const url = URL.createObjectURL(blob);
-                    downloadLink.href = url;
-                    // downloadLink.download = 'Maritime Dataset.gz';
-                    downloadLink.click();
-                    URL.revokeObjectURL(url);
-
-                    // Enable the button and remove the grayed-out class
-                    this.submitButton.disabled = false;
-                    this.submitButton.classList.remove('grayed-out');
-                    this.submitButton.textContent = 'Download'
-
-                } else {
-                    console.error('Error:', response.status, response.statusText);
-                    this.submitButton.disabled = false;
-                    this.submitButton.classList.remove('grayed-out');
-                    this.submitButton.textContent = 'Download'
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                // Enable the button and remove the grayed-out class in case of an error
-                this.submitButton.disabled = false;
-                this.submitButton.classList.remove('grayed-out');
-                this.submitButton.textContent = 'Download'
-
-            }
-
-            console.log(this.siteList);
-        });
-    }
-
-    setMarkerClass(markerLayer) {
-        this.markerLayer = markerLayer
-    }
 
     dateSelection() {
         this.dateSelectionDiv = document.createElement('div');
@@ -783,7 +581,7 @@ export class FieldInit
         h2.textContent = 'Start/End Date';
         h2.style.display = 'flex';
         h2.style.justifyContent = 'center';
-        h2.addEventListener('click', function() {
+        h2.addEventListener('click', function () {
             this.dateSelectionCont.classList.toggle('hidden'); // Toggle the 'hidden' class
         }.bind(this));
         this.dateSelectionDiv.appendChild(h2);
@@ -829,6 +627,16 @@ export class FieldInit
         this.start_dateInput.setAttribute('max', today);
         end_dateContainer.appendChild(this.end_dateInput);
 
+        this.dateSelectionCont.appendChild(start_dateContainer);
+        this.dateSelectionCont.appendChild(end_dateContainer);
+        this.dateSelectionCont.classList.add('hidden')
+
+        this.dateButtons()
+        this.dateListener()
+        this.modifySectionContainer.appendChild(this.dateSelectionDiv);
+    }
+
+    dateListener() {
         this.start_dateInput.addEventListener('input', () => {
             const selectedDate = new Date(this.start_dateInput.value);
             if (selectedDate.toISOString().split('T')[0] === today) {
@@ -840,18 +648,49 @@ export class FieldInit
                 this.end_dateInput.setAttribute('min', minDate);
             }
         });
+    }
 
-        this.dateSelectionCont.appendChild(start_dateContainer);
-        this.dateSelectionCont.appendChild(end_dateContainer);
-        this.dateSelectionCont.classList.add('hidden')
+    dateButtons() {
+        const addButtonContainer = document.createElement('div');
+        this.dateClearButton = document.createElement('button');
+        this.dateUpdateButton = document.createElement('button');
+        this.dateClearButton.textContent = 'Clear';
+        this.dateClearButton.style.float = 'left';
+        this.dateUpdateButton.textContent = 'Update';
+        this.dateUpdateButton.style.float = 'right';
+        addButtonContainer.appendChild(this.dateClearButton)
+        addButtonContainer.appendChild(this.dateUpdateButton)
+        this.dateSelectionCont.appendChild(addButtonContainer)
+        this.dateEventListener()
+    }
 
-        this.dateButtons()
-        this.modifySectionContainer.appendChild(this.dateSelectionDiv);
+    dateEventListener() {
+        this.dateClearButton.addEventListener('click', (event) => {
+            this.start_date = null;
+            this.end_date = null;
+
+            this.updateSiteList()
+            // this.markerLayer.updateMarkers()
+            this.markerLayer.drawRecAuto()
+        });
+
+        this.dateUpdateButton.addEventListener('click', (event) => {
+
+            event.preventDefault();
+            if (this.form.checkValidity()) {
+
+                this.end_date = this.end_dateInput.value;
+                this.start_date = this.start_dateInput.value;
+                this.updateSiteList()
+                // this.b
+                this.markerLayer.updateMarkers()
+                this.markerLayer.drawRecAuto()
+            }
+        });
     }
 
 
-    boundSelection()
-    {
+    boundSelection() {
         this.form = document.createElement('form');
 
 
@@ -862,7 +701,7 @@ export class FieldInit
         this.boundsContainerHeader.style.display = 'flex';
         this.boundsContainerHeader.style.justifyContent = 'center';
         this.boundsContainerHeader.textContent = 'Set Boundaries';
-        this.boundsContainerHeader.addEventListener('click', function() {
+        this.boundsContainerHeader.addEventListener('click', function () {
             this.boundSelectionContainer.classList.toggle('hidden'); // Toggle the 'hidden' class
         }.bind(this));
         this.boundsContainer.appendChild(this.boundsContainerHeader);
@@ -871,7 +710,7 @@ export class FieldInit
         this.boundSelectionContainer.classList.add('bounds-fields');
         this.boundSelectionContainer.classList.add('hidden')
 
-// Minimum Latitude
+        // Minimum Latitude
         this.minlatContainer = document.createElement('div');
         this.minlatContainer.style.display = 'block';
         this.minlatLabel = document.createElement('label');
@@ -886,7 +725,7 @@ export class FieldInit
         this.minlatContainer.appendChild(this.minlatInput);
         this.boundSelectionContainer.appendChild(this.minlatContainer);
 
-// Minimum Longitude
+        // Minimum Longitude
         this.minlngContainer = document.createElement('div');
         this.minlngContainer.style.display = 'block';
         this.minlngLabel = document.createElement('label');
@@ -901,7 +740,7 @@ export class FieldInit
         this.minlngContainer.appendChild(this.minlngInput);
         this.boundSelectionContainer.appendChild(this.minlngContainer);
 
-// Maximum Latitude
+        // Maximum Latitude
         this.maxlatContainer = document.createElement('div');
         this.maxlatContainer.style.display = 'block';
         this.maxlatLabel = document.createElement('label');
@@ -916,7 +755,7 @@ export class FieldInit
         this.maxlatContainer.appendChild(this.maxlatInput);
         this.boundSelectionContainer.appendChild(this.maxlatContainer);
 
-// Maximum Longitude
+        // Maximum Longitude
         this.maxlngContainer = document.createElement('div');
         this.maxlngContainer.style.display = 'block';
         this.maxlngLabel = document.createElement('label');
@@ -942,8 +781,14 @@ export class FieldInit
         // this.submissionContainer.appendChild(this.submitButton);
     }
 
-    boundaryEventListener()
-    {
+    handleBounds(minLat, minLng, maxLat, maxLng) {
+        this.minLat = minLat
+        this.minLng = minLng
+        this.maxLat = maxLat
+        this.maxLng = maxLng
+    }
+
+    boundaryEventListener() {
         this.boundaryClearButton.addEventListener('click', (event) => {
             this.minLat = null;
             this.minLng = null;
@@ -961,7 +806,7 @@ export class FieldInit
 
             event.preventDefault();
             if (this.form.checkValidity()) {
-                console.log(this.minLat, this.minLng,this.maxLat, this.maxLng)
+                console.log(this.minLat, this.minLng, this.maxLat, this.maxLng)
 
                 this.minLat = this.minlatInput.value;
                 this.minLng = this.minlngInput.value;
@@ -975,31 +820,90 @@ export class FieldInit
         });
     }
 
-    dateEventListener()
-    {
-        this.dateClearButton.addEventListener('click', (event) => {
-            this.start_date = null;
-            this.end_date = null;
+    boundaryButtons() {
+        const addButtonContainer = document.createElement('div');
+        this.boundaryClearButton = document.createElement('button');
+        this.boundaryUpdateButton = document.createElement('button');
+        this.boundaryClearButton.textContent = 'Clear';
+        this.boundaryClearButton.style.float = 'left';
+        this.boundaryUpdateButton.textContent = 'Update';
+        this.boundaryUpdateButton.style.float = 'right';
+        addButtonContainer.appendChild(this.boundaryClearButton)
+        addButtonContainer.appendChild(this.boundaryUpdateButton)
+        this.boundSelectionContainer.appendChild(addButtonContainer)
+        this.boundaryEventListener();
 
-            this.updateSiteList()
-            // this.markerLayer.updateMarkers()
-            this.markerLayer.drawRecAuto()
-        });
 
-        this.dateUpdateButton.addEventListener('click', (event) => {
-
-            event.preventDefault();
-            if (this.form.checkValidity()) {
-
-                this.end_date = this.end_dateInput.value;
-                this.start_date = this.start_dateInput.value;
-                this.updateSiteList()
-                // this.b
-                this.markerLayer.updateMarkers()
-                this.markerLayer.drawRecAuto()
-            }
-        });
     }
 
+
+    downloadButton() {
+        this.submitButton = document.createElement('button')
+        this.submitButton.classList.add('download')
+        this.submitButton.type = 'submit'
+        this.submitButton.textContent = 'Download'
+        this.submitButton.style.position = 'relative';
+        this.submitButton.style.bottom = '10px';
+        this.submitButton.style.width = '100%'
+        this.submitButton.style.margin = '20px 0px 0px 0px'
+        this.fieldsContainer.appendChild(this.submitButton)
+
+
+    }
+
+
+    submissionListener() {
+        this.submitButton.addEventListener('click', async event => {
+            this.submitButton.disabled = true;
+            this.submitButton.textContent = 'Processing, Please wait.';
+            this.submitButton.classList.add('grayed-out');
+
+            const url = 'http://127.0.0.1:4956/maritimeapp/download/'; // Update the URL to the appropriate endpoint
+            const options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.csrfToken,
+                },
+                body: JSON.stringify({
+                    sites: {list: this.siteList, dates: this.siteDates},
+                    date_range: {start_date: this.start_date, end_date: this.end_date},
+                    download_options: this.selectedOptions
+                }),
+            };
+
+            try {
+                const response = await fetch(url, options);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const downloadLink = document.createElement('a');
+                    const url = URL.createObjectURL(blob);
+                    downloadLink.href = url;
+                    // downloadLink.download = 'Maritime Dataset.gz';
+                    downloadLink.click();
+                    URL.revokeObjectURL(url);
+
+                    // Enable the button and remove the grayed-out class
+                    this.submitButton.disabled = false;
+                    this.submitButton.classList.remove('grayed-out');
+                    this.submitButton.textContent = 'Download'
+
+                } else {
+                    console.error('Error:', response.status, response.statusText);
+                    this.submitButton.disabled = false;
+                    this.submitButton.classList.remove('grayed-out');
+                    this.submitButton.textContent = 'Download'
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                // Enable the button and remove the grayed-out class in case of an error
+                this.submitButton.disabled = false;
+                this.submitButton.classList.remove('grayed-out');
+                this.submitButton.textContent = 'Download'
+
+            }
+
+        });
+    }
 
 }
