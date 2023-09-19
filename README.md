@@ -1,4 +1,4 @@
-# Maritime AERONET Data (MAN) Data Downloader
+# Maritime Aerosol Network (MAN) Data Downloader
 AERONET is an international federation of ground based sun and sky scanning radiometer networks which includes hundreds of instruments covering a large portion of Earths surface to provide measurements for aerosol research.
 
 This tool serves to create customizable datasets for maritime data.
