@@ -1,7 +1,7 @@
 
 import {MarkerManager} from './marker.js'
 import { initMap } from './init.js';
-import {FieldInit} from '/fields.js'
+// import {FieldInit} from '/fields.js'
 import {getData} from "./data.js";
 
 let buildBox = false
@@ -48,7 +48,7 @@ let api_call = 'http://127.0.0.1:4956/maritimeapp/measurements/?format=json&leve
         buildBox = true
     }
 
-const api_url = 'http://localhost:4956/maritimeapp/measurements/'
+const api_url = 'http://127.0.0.1:4956/maritimeapp/measurements/'
 // Usage
 // const url = '...'; // URL to fetch data from
 const allResults = await getData(api_call);

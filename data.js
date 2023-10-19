@@ -1,5 +1,5 @@
 // import {getDate} from './components.js';
-
+//
 // Latest data flow
 // const date = getDate().toISOString().split('T')[0].split('-');
 // const allSites = 'https://aeronet.gsfc.nasa.gov/aeronet_locations_v3.txt'

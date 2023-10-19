@@ -1,6 +1,6 @@
 // import { getAvg, getAvgUrl, getFullData, buildChartData, latestOfSet } from './data.js';
 import { setColor } from './components.js';
-import { drawGraph } from './chart.js';
+// import { drawGraph } from './chart.js';
 import { FieldInit } from "./fields.js";
 import {getData} from "./data.js";
 
