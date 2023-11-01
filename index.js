@@ -20,8 +20,8 @@ localStorage.removeItem('maxLat')
 localStorage.removeItem('maxLng')
 localStorage.removeItem('siteList')
 
-
-let api_call = 'http://127.0.0.1:4956/maritimeapp/measurements/?format=json&level=15&reading=aod&type=daily';
+const api_ep = "http://localhost:8000"
+let api_call = `${api_ep}/maritimeapp/measurements/?format=json&level=15&reading=aod&type=daily`;
     if (startDate && startDate !== 'null') {
         api_call += `&start_date=${startDate}`;
     }
@@ -44,11 +44,10 @@ let api_call = 'http://127.0.0.1:4956/maritimeapp/measurements/?format=json&leve
 
     if (maxLng && maxLng !== 'null') {
         api_call += `&max_lng=${maxLng}`;
-        console.log("WORKED")
         buildBox = true
     }
 
-const api_url = 'http://127.0.0.1:4956/maritimeapp/measurements/'
+const api_url = `${api_ep}/maritimeapp/measurements/`
 // Usage
 // const url = '...'; // URL to fetch data from
 const allResults = await getData(api_call);

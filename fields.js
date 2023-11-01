@@ -6,6 +6,7 @@
 
 
 export class FieldInit {
+    api_ep = "http://localhost:8000";
     constructor() {
         this.selectedOptions = {};
 
@@ -88,7 +89,7 @@ export class FieldInit {
     getCSRFCookie() {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
-            xhr.open('GET', 'http://127.0.0.1:4956/maritimeapp/get-csrf-token/', true);
+            xhr.open('GET', `${this.api_ep}/maritimeapp/get-csrf-token/`, true);
             xhr.onreadystatechange = async function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
@@ -162,27 +163,27 @@ export class FieldInit {
         let api_args;
         // console.log(this.start_date)
         if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.start_date !== '' && this.end_date !== '') {
-            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.start_date}&end_date=${this.end_date}`;
+            api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.start_date}&end_date=${this.end_date}`;
         } else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.end_date !== '') {
-            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&end_date=${this.end_date}`;
+            api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&end_date=${this.end_date}`;
 
         } else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.start_date !== '') {
-            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.start_date}`;
+            api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.start_date}`;
 
         } else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null) {
-            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}`;
+            api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}`;
 
         } else if (this.start_date !== null && this.end_date !== null) {
-            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&start_date=${this.start_date}&end_date=${this.end_date}`;
+            api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&start_date=${this.start_date}&end_date=${this.end_date}`;
         } else if (this.end_date !== null) {
-            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&end_date=${this.end_date}`;
+            api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&end_date=${this.end_date}`;
 
         } else if (this.start_date !== null) {
-            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&start_date=${this.start_date}`;
+            api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&start_date=${this.start_date}`;
 
         } else {
             console.log("running here line 366")
-            api_args = `http://127.0.0.1:4956/maritimeapp/sites/`
+            api_args = `${this.api_ep}/maritimeapp/sites/`
         }
         console.log(api_args)
         return this.fetchData(api_args);
@@ -858,7 +859,7 @@ export class FieldInit {
             this.submitButton.textContent = 'Processing, Please wait.';
             this.submitButton.classList.add('grayed-out');
 
-            const url = 'http://127.0.0.1:4956/maritimeapp/download/'; // Update the URL to the appropriate endpoint
+            const url = `${this.api_ep}/maritimeapp/download/`; // Update the URL to the appropriate endpoint
             const options = {
                 method: 'POST',
                 headers: {

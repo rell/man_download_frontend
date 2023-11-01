@@ -18,7 +18,7 @@ export function initMap() {
         noWrap: true,
         tileSize: 256,
         errorTileUrl: '',
-        errorTileTimeout: 5000,
+        errorTileTimeout: 500,
     });
 
     // Define the bounds for the map

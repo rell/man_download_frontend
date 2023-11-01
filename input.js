@@ -231,6 +231,7 @@ class BoundingBoxContainer {
 
 
 class SiteSelection {
+    api_ep = "http://localhost:8000"
     constructor() {
         this.startDate = null;
         this.endDate = null;
@@ -304,41 +305,41 @@ class SiteSelection {
         let api_args;
         if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.startDate !== '' && this.endDate !== '')
         {
-            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.startDate}&end_date=${this.endDate}`;
+            api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.startDate}&end_date=${this.endDate}`;
         }
         else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.endDate !== '')
         {
-            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&end_date=${this.endDate}`;
+            api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&end_date=${this.endDate}`;
 
         }
         else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.startDate !== '')
         {
-            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.startDate}`;
+            api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.startDate}`;
 
         }
         else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null)
         {
-            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}`;
+            api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}`;
 
         }
         else if (this.startDate !== null && this.endDate !== null)
         {
-            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&start_date=${this.startDate}&end_date=${this.endDate}`;
+            api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&start_date=${this.startDate}&end_date=${this.endDate}`;
         }
         else if (this.endDate !== null)
         {
-            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&end_date=${this.endDate}`;
+            api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&end_date=${this.endDate}`;
 
         }
         else if (this.startDate !== null)
         {
-            api_args = `http://127.0.0.1:4956/maritimeapp/measurements/sites/?format=json&start_date=${this.startDate}`;
+            api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&start_date=${this.startDate}`;
             console.log(this.startDate)
 
         }
         else {
             console.log("running here line 366")
-            api_args = `http://127.0.0.1:4956/maritimeapp/sites/`
+            api_args = `${this.api_ep}/maritimeapp/sites/`
         }
         return this.fetchData(api_args);
     }

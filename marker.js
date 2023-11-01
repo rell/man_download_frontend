@@ -21,6 +21,8 @@ function generateGradientColors(startColor, endColor, numSteps) {
   return colors;
 }
 export class MarkerManager {
+
+  url_ep = "http://localhost:8000"
   FieldInit = new FieldInit;
 
   constructor(map, baseLayer, args = undefined) {
@@ -320,7 +322,7 @@ export class MarkerManager {
 
 
   createAPICall(){
-     this.api_call = 'http://127.0.0.1:4956/maritimeapp/measurements/?format=json&level=15&reading=aod&type=daily';
+     this.api_call = `${this.url_ep}/maritimeapp/measurements/?format=json&level=15&reading=aod&type=daily`;
     if (this.startDate && this.startDate !== 'null') {
 
       this.api_call += `&start_date=${this.startDate}`;

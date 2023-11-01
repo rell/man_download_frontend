@@ -5,7 +5,6 @@
 // const allSites = 'https://aeronet.gsfc.nasa.gov/aeronet_locations_v3.txt'
 // const api_args = `?year=2023&month=6&day=11&AOD15=1&AVG=10&if_no_html=1`
 
-const api_url = 'http://localhost:4956/maritimeapp/measurements/'
 export async function getData(url)
 {
     try
