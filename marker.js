@@ -202,9 +202,6 @@ export class MarkerManager {
   }
   resetMap() {
     const resetMap = L.Control.extend({
-      options: {
-        position: 'bottomright'
-      },
       onAdd: (map) => {
         // Create a button element
         var button = L.DomUtil.create('button', 'reset-button');
@@ -216,6 +213,9 @@ export class MarkerManager {
         });
         // Return the button element
         return button;
+      },
+      options: {
+        position: 'bottomleft'
       }
     });
     this.map.addControl(new resetMap());
@@ -302,52 +302,54 @@ export class MarkerManager {
     this.data = await getData(this.api_call);
     this.addMarker(this.data)
 
-
-    // const bounds = L.latLngBounds(
-    //     L.latLng(this.minLat, this.minLng),
-    //     L.latLng(this.maxLat, this.maxLng)
-    // );
     const transparentStyle = {
-      color: 'red',
+      color: 'blue',
       weight: 2,
-      fill: false,
-      opacity: 100,
+      fill: 'white',
+      opacity: 50,
       interactive: false
     };
 
 // Create a transparent rectangle layer
-    const rectangle = L.rectangle(bounds, transparentStyle).addTo(this.map);
+    L.rectangle(bounds, transparentStyle).addTo(this.map);
 
   }
 
 
   createAPICall(){
+
      this.api_call = `${this.url_ep}/maritimeapp/measurements/?format=json&level=15&reading=aod&type=daily`;
+
     if (this.startDate && this.startDate !== 'null') {
 
       this.api_call += `&start_date=${this.startDate}`;
+
     }
     if (this.endDate && this.endDate !== 'null') {
 
       this.api_call += `&end_date=${this.endDate}`;
+
     }
     if (this.minLat && this.minLat !== 'null') {
 
       this.api_call += `&min_lat=${this.minLat}`;
+
     }
     if (this.minLng && this.minLng !== 'null') {
 
       this.api_call += `&min_lng=${this.minLng}`;
+
     }
     if (this.maxLat && this.maxLat !== 'null') {
 
       this.api_call += `&max_lat=${this.maxLat}`;
+
     }
     if (this.maxLng && this.maxLng !== 'null') {
 
       this.api_call += `&max_lng=${this.maxLng}`;
-    }
 
+    }
   }
 
   // evenListener() {
@@ -397,8 +399,7 @@ export class MarkerManager {
     else
     {
       this.createAPICall()
-      console.log(this.api_call)
-
+      // console.log(this.api_call)
       this.data = await getData(this.api_call)
       // this.outsideModified = true
       this.addMarker(this.data)
@@ -406,10 +407,8 @@ export class MarkerManager {
   }
 
   setSiteList(siteList) {
-
         this.siteList = eval(siteList)
-
-        console.log(this.siteList)
+        // console.log(this.siteList)
   }
   shareMarkerClass(markerLayer){
     this.FieldInit.setMarkerClass(markerLayer)
