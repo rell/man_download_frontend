@@ -1,21 +1,19 @@
-export async function getData(url)
-{
-    try
-    {
-    let nextUrl = url;
-    let allResults = [];
+export async function getData(url) {
+    try {
+        let nextUrl = url;
+        let allResults = [];
 
-    while (nextUrl) {
-        console.log(nextUrl)
-        const response = await fetch(nextUrl);
-        const data = await response.json();
+        while (nextUrl) {
+            console.log(nextUrl)
+            const response = await fetch(nextUrl);
+            const data = await response.json();
 
-        allResults = allResults.concat(data.results);
-        console.log(allResults)
-        nextUrl = data.next; // update nextUrl here
-    }
+            allResults = allResults.concat(data.results);
+            console.log(allResults)
+            nextUrl = data.next; // update nextUrl here
+        }
 
-    return allResults;
+        return allResults;
 
     } catch (error) {
         console.error(error);

@@ -44,6 +44,7 @@ export function initMap() {
         basemapLayer: basemapLayer,
     };
 }
+
 export function initDropdown(id, options, fieldDescription, placeholder, disabledPlaceholder, group, toolTipContent)// create dropdown fields
 {
     let dropdownHTML = `<div class="tooltip-container">

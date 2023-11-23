@@ -1,16 +1,15 @@
-
 import {MarkerManager} from './marker.js'
-import { initMap } from './init.js';
+import {initMap} from './init.js';
 // import {FieldInit} from '/fields.js'
 import {getData} from "./data.js";
 
 let buildBox = false
-const startDate  = localStorage.getItem('startDate')
-const endDate  = localStorage.getItem('endDate')
-const minLat  = eval(localStorage.getItem('minLat'))
-const minLng  = eval(localStorage.getItem('minLng'))
-const maxLat  = eval(localStorage.getItem('maxLat'))
-const maxLng  = eval(localStorage.getItem('maxLng'))
+const startDate = localStorage.getItem('startDate')
+const endDate = localStorage.getItem('endDate')
+const minLat = eval(localStorage.getItem('minLat'))
+const minLng = eval(localStorage.getItem('minLng'))
+const maxLat = eval(localStorage.getItem('maxLat'))
+const maxLng = eval(localStorage.getItem('maxLng'))
 const siteList = eval(localStorage.getItem('siteList'))
 localStorage.removeItem('startDate')
 localStorage.removeItem('endDate')
@@ -22,30 +21,30 @@ localStorage.removeItem('siteList')
 
 const api_ep = "http://localhost:8000"
 let api_call = `${api_ep}/maritimeapp/measurements/?format=json&level=15&reading=aod&type=daily`;
-    if (startDate && startDate !== 'null') {
-        api_call += `&start_date=${startDate}`;
-    }
+if (startDate && startDate !== 'null') {
+    api_call += `&start_date=${startDate}`;
+}
 
-    if (endDate && endDate !== 'null') {
-        api_call += `&end_date=${endDate}`;
-    }
+if (endDate && endDate !== 'null') {
+    api_call += `&end_date=${endDate}`;
+}
 
-    if (minLat && minLat !== 'null') {
-        api_call += `&min_lat=${minLat}`;
-    }
+if (minLat && minLat !== 'null') {
+    api_call += `&min_lat=${minLat}`;
+}
 
-    if (minLng && minLng !== 'null') {
-        api_call += `&min_lng=${minLng}`;
-    }
+if (minLng && minLng !== 'null') {
+    api_call += `&min_lng=${minLng}`;
+}
 
-    if (maxLat && maxLat !== 'null') {
-        api_call += `&max_lat=${maxLat}`;
-    }
+if (maxLat && maxLat !== 'null') {
+    api_call += `&max_lat=${maxLat}`;
+}
 
-    if (maxLng && maxLng !== 'null') {
-        api_call += `&max_lng=${maxLng}`;
-        buildBox = true
-    }
+if (maxLng && maxLng !== 'null') {
+    api_call += `&max_lng=${maxLng}`;
+    buildBox = true
+}
 
 const api_url = `${api_ep}/maritimeapp/measurements/`
 // Usage
@@ -59,8 +58,7 @@ markerLayer.shareMarkerClass(markerLayer)
 markerLayer.setSiteList(siteList);
 markerLayer.addMarker(allResults);
 
-if (buildBox)
-{
+if (buildBox) {
     markerLayer.FieldInit.minLat = minLat
     markerLayer.FieldInit.minLng = minLng
     markerLayer.FieldInit.maxLat = maxLat
@@ -68,6 +66,7 @@ if (buildBox)
 
     markerLayer.drawRecAuto()
 }
-map.setView([0,0], 0);
+map.setView([0, 0], 0);
+
 
 // console.log(allResults);

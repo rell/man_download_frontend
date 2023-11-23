@@ -74,6 +74,7 @@ class DateFieldCreator {
 
         document.body.appendChild(this.containerDiv);
     }
+
     setSiteField(siteSelection) {
         this.siteField = siteSelection
     }
@@ -191,6 +192,7 @@ class BoundingBoxContainer {
     setSiteField(siteSelection) {
         this.SiteSelection = siteSelection
     }
+
     addValidationListeners() {
         const inputs = [this.input1, this.input2, this.input3, this.input4];
 
@@ -229,9 +231,9 @@ class BoundingBoxContainer {
 }
 
 
-
 class SiteSelection {
     api_ep = "http://localhost:8000"
+
     constructor() {
         this.startDate = null;
         this.endDate = null;
@@ -243,8 +245,7 @@ class SiteSelection {
         this.appendElements();
     }
 
-    createElements()
-    {
+    createElements() {
         this.containerDiv = document.createElement('div');
         this.containerDiv.classList.add('site-container');
 
@@ -262,8 +263,8 @@ class SiteSelection {
         this.newList = document.createElement('ul');
         this.newList.classList.add('new-list');
     }
-    appendElements()
-    {
+
+    appendElements() {
         this.containerDiv.appendChild(this.headerDiv)
         this.containerDiv.appendChild(this.listContainer)
         this.listContainer.appendChild(this.originalList);
@@ -271,7 +272,7 @@ class SiteSelection {
     }
 
     handleChange(event) {
-        const { name, value } = event.target;
+        const {name, value} = event.target;
         if (name === 'startDate') {
             this.startDate = value;
             console.log('Start Date changed:', this.startDate);
@@ -281,8 +282,7 @@ class SiteSelection {
         }
     }
 
-    updateSiteList()
-    {
+    updateSiteList() {
         let listItems = Array.from(this.newList.children);
         listItems.forEach(listItem => {
             this.newList.removeChild(listItem)
@@ -300,56 +300,39 @@ class SiteSelection {
             .then(async response => await response.json());
     }
 
-    fetchMeasurementsData()
-    {
+    fetchMeasurementsData() {
         let api_args;
-        if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.startDate !== '' && this.endDate !== '')
-        {
+        if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.startDate !== '' && this.endDate !== '') {
             api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.startDate}&end_date=${this.endDate}`;
-        }
-        else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.endDate !== '')
-        {
+        } else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.endDate !== '') {
             api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&end_date=${this.endDate}`;
 
-        }
-        else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.startDate !== '')
-        {
+        } else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null && this.startDate !== '') {
             api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}&start_date=${this.startDate}`;
 
-        }
-        else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null)
-        {
+        } else if (this.minLat !== null && this.minLng !== null && this.maxLat !== null && this.maxLng !== null) {
             api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&min_lat=${this.minLat}&min_lng=${this.minLng}&max_lat=${this.maxLat}&max_lng=${this.maxLng}`;
 
-        }
-        else if (this.startDate !== null && this.endDate !== null)
-        {
+        } else if (this.startDate !== null && this.endDate !== null) {
             api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&start_date=${this.startDate}&end_date=${this.endDate}`;
-        }
-        else if (this.endDate !== null)
-        {
+        } else if (this.endDate !== null) {
             api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&end_date=${this.endDate}`;
 
-        }
-        else if (this.startDate !== null)
-        {
+        } else if (this.startDate !== null) {
             api_args = `${this.api_ep}/maritimeapp/measurements/sites/?format=json&start_date=${this.startDate}`;
             console.log(this.startDate)
 
-        }
-        else {
+        } else {
             console.log("running here line 366")
             api_args = `${this.api_ep}/maritimeapp/sites/`
         }
         return this.fetchData(api_args);
     }
 
-    processData(data)
-    {
+    processData(data) {
         this.clearList();
         // console.log(data.results)
-        if (data.results === undefined)
-        {
+        if (data.results === undefined) {
             console.log(data)
             data.forEach(item => {
 
@@ -368,21 +351,18 @@ class SiteSelection {
                 listItem.appendChild(info1);
 
                 const info2 = document.createElement('p');
-                if (siteName.textContent.includes('-'))
-                {
+                if (siteName.textContent.includes('-')) {
                     const siteNameParts = siteName.textContent.split('-');
                     const lastPart = siteNameParts[siteNameParts.length - 1].trim();
                     if (!isNaN(parseFloat(lastPart))) {
                         const description_name = item.name
                         let first_year = description_name.split('-')[0].split('_')
                         first_year = first_year[first_year.length - 1]
-                        const second_year =description_name.split('-')[1]
+                        const second_year = description_name.split('-')[1]
                         info2.textContent = `Start-End: 20${first_year}-20${second_year}`;
                         listItem.appendChild(info2);
                     }
-                }
-                else
-                {
+                } else {
                     info2.textContent = 'Description: ';
                     listItem.appendChild(info2);
                 }
@@ -390,14 +370,12 @@ class SiteSelection {
 
                 listItem.addEventListener('click', () => {
 
-                    if (!listItem.className.includes('selected'))
-                    {
+                    if (!listItem.className.includes('selected')) {
                         this.moveItemToList(item.site_name);
                         this.saveSelectedItem(item.site_name);
                         listItem.classList.add('selected');
                     }
-                    if (listItem.className.includes('selected'))
-                    {
+                    if (listItem.className.includes('selected')) {
                         listItem.classList.remove('selected')
                     }
                 });
@@ -407,8 +385,7 @@ class SiteSelection {
                         listItem.classList.add('selected');
                         this.moveItemToList(item.name);
                         this.saveSelectedItem(item.name);
-                    }
-                    else if(listItem.className.includes('selected')){
+                    } else if (listItem.className.includes('selected')) {
                         listItem.classList.remove('selected');
 
                     }
@@ -416,8 +393,7 @@ class SiteSelection {
 
                 this.originalList.appendChild(listItem);
             });
-        }
-        else {
+        } else {
             data.results.forEach(item => {
                 const listItem = document.createElement('li');
                 listItem.classList.add('item');
@@ -433,21 +409,18 @@ class SiteSelection {
                 listItem.appendChild(info1);
 
                 const info2 = document.createElement('p');
-                if (siteName.textContent.includes('-'))
-                {
+                if (siteName.textContent.includes('-')) {
                     const siteNameParts = siteName.textContent.split('-');
                     const lastPart = siteNameParts[siteNameParts.length - 1].trim();
                     if (!isNaN(parseFloat(lastPart))) {
                         const description_name = item.name
                         let first_year = description_name.split('-')[0].split('_')
                         first_year = first_year[first_year.length - 1]
-                        const second_year =description_name.split('-')[1]
+                        const second_year = description_name.split('-')[1]
                         info2.textContent = `Start-End: 20${first_year}-20${second_year}`;
                         listItem.appendChild(info2);
                     }
-                }
-                else
-                {
+                } else {
                     info2.textContent = 'Description: ';
                     listItem.appendChild(info2);
                 }
@@ -457,8 +430,7 @@ class SiteSelection {
                         listItem.classList.add('selected');
                         this.moveItemToList(item.name);
                         this.saveSelectedItem(item.name);
-                    }
-                    else if(listItem.className.includes('selected')){
+                    } else if (listItem.className.includes('selected')) {
                         listItem.classList.remove('selected');
                         this.moveItemToList(item.name)
 
@@ -475,6 +447,7 @@ class SiteSelection {
             this.originalList.firstChild.remove();
         }
     }
+
     addAllSites() {
         const listItems = Array.from(this.originalList.children);
         listItems.forEach(listItem => {
@@ -500,6 +473,7 @@ class SiteSelection {
         console.log(this.originalList);
         localStorage.removeItem('selectedItem');
     }
+
     moveItemToList(item) {
         const existingItem = Array.from(this.newList.children).find(
             listItem => listItem.textContent === item
@@ -508,7 +482,7 @@ class SiteSelection {
         if (existingItem) {
             this.newList.removeChild(existingItem);
 
-        }else {
+        } else {
             const newListItem = document.createElement('li');
             newListItem.textContent = item;
             this.newList.appendChild(newListItem);
@@ -599,7 +573,7 @@ const submitData = (dateField, siteSelection) => {
     });
 }
 
-window.onload = function() {
+window.onload = function () {
     // fieldCreator
     const dateField = new DateFieldCreator();
     const bboxField = new BoundingBoxContainer();

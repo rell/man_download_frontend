@@ -121,11 +121,6 @@ label
     font-weight: bold;
 }
 
-body
-{
-    overflow-y: hidden;
-}
-
 
 select {
     display: inline-block;
